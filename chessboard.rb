@@ -17,41 +17,21 @@ class GameBoard
     turns
   end
 
-  def setup
-    @board[0][0] = 'r'
-    @board[1][0] = 'n'
-    @board[2][0] = 'b'
-    @board[3][0] = 'q'
-    @board[4][0] = 'k'
-    @board[5][0] = 'b'
-    @board[6][0] = 'n'
-    @board[7][0] = 'r'
-    @board[0][7] = 'R'
-    @board[1][7] = 'N'
-    @board[2][7] = 'B'
-    @board[3][7] = 'Q'
-    @board[4][7] = 'K'
-    @board[5][7] = 'B'
-    @board[6][7] = 'N'
-    @board[7][7] = 'R'
-  end
-
   def display
-    puts setup
-    #pieces = %w{r n b q k b n r R N B Q K B N R}
+    pieces = %w{r n b q k b n r R N B Q K B N R}
     display_string = ''
 
     7.downto(0) do |row|
       display_string << "+---+---+---+---+---+---+---+---+ \n"
       0.upto(7) do |column|
-      #  if row == 0
-      #    display_string << "| #{@board[column][row] = pieces.pop} "
-        if row == 1
+        if row == 0
+          display_string << "| #{@board[column][row] = pieces.pop} "
+        elsif row == 1
           display_string << "| #{@board[column][row] = 'p'} "
         elsif row == 6
           display_string << "| #{@board[column][row] = 'P'} "
-      #  elsif row == 7
-      #      display_string << "| #{@board[column][row] = pieces.pop} "
+        elsif row == 7
+            display_string << "| #{@board[column][row] = pieces.pop} "
         else
           display_string << "| #{@board[column][row]} "
         end
