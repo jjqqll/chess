@@ -37,22 +37,21 @@ class GameBoard
   end
 
   def display
-    #puts setup
-    #pieces = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-    pieces = %w{r n b q k b n r R N B Q K B N R}
+    puts setup
+    #pieces = %w{r n b q k b n r R N B Q K B N R}
     display_string = ''
 
     7.downto(0) do |row|
       display_string << "+---+---+---+---+---+---+---+---+ \n"
       0.upto(7) do |column|
-        if row == 0
-          display_string << "| #{@board[column][row] = pieces.pop} "
-        elsif row == 1
+      #  if row == 0
+      #    display_string << "| #{@board[column][row] = pieces.pop} "
+        if row == 1
           display_string << "| #{@board[column][row] = 'p'} "
         elsif row == 6
           display_string << "| #{@board[column][row] = 'P'} "
-        elsif row == 7
-            display_string << "| #{@board[column][row] = pieces.pop} "
+      #  elsif row == 7
+      #      display_string << "| #{@board[column][row] = pieces.pop} "
         else
           display_string << "| #{@board[column][row]} "
         end
