@@ -1,3 +1,5 @@
+require_relative 'chessboard.rb'
+
 class Player
   attr_accessor :name, :disc
 
@@ -7,13 +9,22 @@ class Player
   end
 
   def take_turn(options, stdin = $stdin)
-    print "\nPlease select your chess piece then a square on the board for your next move., #{@name} #{@disc} ?\n> "
-    input = stdin.gets.chomp.to_i
+    print "\nPlease select the chess piece you want to move by selecting the square it currently occupies(column# first, then row#).\n> "
+    input1 = stdin.gets.chomp.to_i
 
-    until options.include?(input)
+    until options.include?(input1)
       print "That is an incorrect value! Try again:\n> "
-      input = stdin.gets.chomp.to_i
+      input1 = stdin.gets.chomp.to_i
     end
-    input
+
+    print "\nPlease select the square where you want to move your chess piece to(column# first, then row#).\n> "
+    input2 = stdin.gets.chomp.to_i
+
+    until options.include?(input2)
+      print "That is an incorrect value! Try again:\n> "
+      input2 = stdin.gets.chomp.to_i
+    end
+
+    input2
   end
 end

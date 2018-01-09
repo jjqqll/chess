@@ -1,14 +1,15 @@
 require_relative 'chessplayer.rb'
 
 class GameBoard
-  attr_accessor :board, :player1, :player2, :turn_number, :options
+  attr_accessor :board, :player1, :player2, :on_board, :turn_number, :options
 
   def initialize(name1 = "Player 1", name2 = "Player 2")
     @board = Array.new(8) { Array.new(8, ' ') }
     @player1 = Player.new(name1, '☺')
     @player2 = Player.new(name2, '☻')
+    @on_board = on_board
     @turn_number = 1
-    @options = [1,2,3,4,5,6,7]
+    @options = [0, 1, 2, 3, 4, 5, 6, 7].repeated_permutation(2).to_a.map {|x| x.join.to_i}
   end
 
   def play
@@ -36,11 +37,11 @@ class GameBoard
           display_string << "| #{@board[column][row]} "
         end
       end
-      display_string << "|#{row+1}\n"
+      display_string << "|#{row}\n"
     end
 
     display_string << "+---+---+---+---+---+---+---+---+ \n"
-    display_string << '  a   b   c   d   e   f   g   h  '
+    display_string << '  0   1   2   3   4   5   6   7  '
 
     puts display_string
   end
@@ -49,12 +50,18 @@ class GameBoard
     print "\nWelcome to Chess!  The player with the white(lower cases) pieces moves first.\n"
   end
 
+  def on_board(position=[0,0]) # checks if position is within the ChessBoard
+    position[0].between?(0,7) && position[1].between?(0,7) ? true : false
+  end
+
   def turns
     won = false
-    until @turn_number > 42 || won
+    draw = false
+    until draw || won
       turn
       @turn_number += 1
       display
+      #draw = check_for_draw
       won = check_for_win
     end
     won ? win : draw
@@ -62,8 +69,8 @@ class GameBoard
 
   def turn
     player = @turn_number.even? ? @player2 : @player1
-    chosen_column = player.take_turn(@options) - 1
-    add_disc(player, chosen_column)
+    chosen_square = player.take_turn(@options) - 1
+    add_disc(player, chosen_square)
   end
 
   def add_disc(player, column)
