@@ -1,13 +1,13 @@
 require_relative 'chessplayer.rb'
 
 class GameBoard
-  attr_accessor :board, :player1, :player2, :on_board, :turn_number, :options
+  attr_accessor :board, :player1, :player2, :move_piece, :turn_number, :options
 
   def initialize(name1 = "Player 1", name2 = "Player 2")
     @board = Array.new(8) { Array.new(8, ' ') }
     @player1 = Player.new(name1, '☺')
     @player2 = Player.new(name2, '☻')
-    @on_board = on_board
+    @move_piece = move_piece
     @turn_number = 1
     @options = [0, 1, 2, 3, 4, 5, 6, 7].repeated_permutation(2).to_a.map {|x| x.join.to_i}
   end
@@ -50,9 +50,9 @@ class GameBoard
     print "\nWelcome to Chess!  The player with the white(lower cases) pieces moves first.\n"
   end
 
-  def on_board(position=[0,0]) # checks if position is within the ChessBoard
-    position[0].between?(0,7) && position[1].between?(0,7) ? true : false
-  end
+#  def on_board(position=[0,0]) # checks if position is within the ChessBoard
+#    position[0].between?(0,7) && position[1].between?(0,7) ? true : false
+#  end
 
   def turns
     won = false
@@ -69,17 +69,20 @@ class GameBoard
 
   def turn
     player = @turn_number.even? ? @player2 : @player1
-    chosen_square = player.take_turn(@options) - 1
-    add_disc(player, chosen_square)
+    from_square = player.take_turn_from(@options)
+    to_square = player.take_turn_to(@options)
+    delete_disc(player, from_square[0].to_i, from_square[1].to_i)
+    add_disc(player, to_square[0].to_i, to_square[1].to_i)
   end
 
-  def add_disc(player, column)
-    i = 0
-    until @board[column][i] == " " # go to the lowest empty cell in that column
-      i += 1
-    end
-    @board[column][i] = player.disc
-    @options.delete(column + 1) if i == 5 # delete column from @options when all cells in column is filled
+  def delete_disc(player, from_square1, from_square2)
+    @move_piece = @board[from_square1][from_square2]
+    @board[from_square1][from_square2] = " "
+  end
+
+  def add_disc(player, to_square1, to_square2)
+    @board[to_square1][to_square2] = @move_piece
+    #@options.delete(column + 1) if i == 5 # delete column from @options when all cells in column is filled
   end
 
   def check_for_win
