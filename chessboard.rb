@@ -73,9 +73,11 @@ class GameBoard
     draw = false
     until draw #|| won
       turn
-      @turn_number += 1
       display
-      set_board
+      @turn_number += 1
+      if @turn_number == 1
+        set_board
+      end
       #draw = check_for_draw
       won = check_for_win
     end
