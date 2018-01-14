@@ -1,29 +1,32 @@
 require_relative 'chessboard.rb'
+require_relative 'chesspieces.rb'
 
 class Player
-  attr_accessor :name, :disc
+  attr_accessor :name, :from, :chess_piece
 
-  def initialize(name, disc)
+  def initialize(name)
     @name = name
-    @disc = disc
+    @from = from
+    @chess_piece = ChessPieces.new
   end
 
   def take_turn_from(options, stdin = $stdin)
-    print "\nPlease select the chess piece you want to move by selecting the square it currently occupies(column# first, then row#).\n> "
+    print "\n#{@name}, select the chess piece you want to move by selecting the square it currently occupies(column# first, then row#).\n> "
     input1 = stdin.gets.chomp.to_i
+    @from = convert_input(input1)
 
-    until options.include?(input1)
+    until options.include?(input1) #&& @move_piece != " "
       print "That is an incorrect value! Try again:\n> "
       input1 = stdin.gets.chomp.to_i
     end
     convert_input(input1)
   end
-
+  p @move_piece
   def take_turn_to(options, stdin = $stdin)
-    print "\nPlease select the square where you want to move your chess piece to(column# first, then row#).\n> "
+    print "\n#{@name}, select the square where you want to move your chess piece to(column# first, then row#).\n> "
     input2 = stdin.gets.chomp.to_i
 
-    until options.include?(input2)
+    until options.include?(input2) && valid_moves.include?(input2.to_s)
       print "That is an incorrect value! Try again:\n> "
       input2 = stdin.gets.chomp.to_i
     end
@@ -32,10 +35,17 @@ class Player
 
   def convert_input(input)
     if input.to_s.length == 1
-      input = input.to_s.rjust(2, "0").split("")
+      input = input.to_s.rjust(2, "0").split("").collect { |x| x.to_i }
     else
-      input = input.to_s.split("")
+      input = input.to_s.split("").collect { |x| x.to_i }
     end
     input
   end
+
+  def valid_moves
+    # if @move_piece == "n" || @move_piece == "N"
+      @chess_piece.knight_moves(from)
+    # end
+  end
+
 end
