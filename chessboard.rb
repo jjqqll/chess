@@ -2,14 +2,13 @@ require_relative 'chessplayer.rb'
 require_relative 'chesspieces.rb'
 
 class GameBoard
-  attr_accessor :board, :player1, :player2, :move_piece, :to_square, :set_board, :turn_number, :options
+  attr_accessor :board, :player1, :player2, :move_piece, :set_board, :turn_number, :options
 
   def initialize(name1 = "Player 1", name2 = "Player 2")
-    @board = Array.new(8) { Array.new(8, ' ') }
-    @player1 = Player.new(name1)
-    @player2 = Player.new(name2)
+    $board = Array.new(8) { Array.new(8, ' ') }
+    @player1 = Player.new(name1, ['r', 'n', 'b', 'q', 'k', 'p'])
+    @player2 = Player.new(name2, ['R', 'N', 'B', 'Q', 'K', 'P'])
     @move_piece = move_piece
-    @to_square = to_square
     @set_board = set_board
     @turn_number = 1
     @options = [0, 1, 2, 3, 4, 5, 6, 7].repeated_permutation(2).to_a.map {|x| x.join.to_i}
@@ -23,23 +22,12 @@ class GameBoard
   end
 
   def display
-    # pieces = %w{r n b q k b n r R N B Q K B N R}
     display_string = ''
 
     7.downto(0) do |row|
       display_string << "+---+---+---+---+---+---+---+---+ \n"
       0.upto(7) do |column|
-      #  if row == 0
-      #    display_string << "| #{@board[column][row] = pieces.pop} "
-      #  elsif row == 1
-      #    display_string << "| #{@board[column][row] = 'p'} "
-      #  elsif row == 6
-      #    display_string << "| #{@board[column][row] = 'P'} "
-      #  elsif row == 7
-      #    display_string << "| #{@board[column][row] = pieces.pop} "
-      #  else
-          display_string << "| #{@board[column][row]} "
-      #  end
+          display_string << "| #{$board[column][row]} "
       end
       display_string << "|#{row}\n"
     end
@@ -51,14 +39,14 @@ class GameBoard
   end
 
   def set_board
-    @board[0][0] = "r"; @board[0][1] = "p"; @board[0][6] = "P"; @board[0][7] = "R";
-    @board[1][0] = "n"; @board[1][1] = "p"; @board[1][6] = "P"; @board[1][7] = "N";
-    @board[2][0] = "b"; @board[2][1] = "p"; @board[2][6] = "P"; @board[2][7] = "B";
-    @board[3][0] = "q"; @board[3][1] = "p"; @board[3][6] = "P"; @board[3][7] = "Q";
-    @board[4][0] = "k"; @board[4][1] = "p"; @board[4][6] = "P"; @board[4][7] = "K";
-    @board[5][0] = "b"; @board[5][1] = "p"; @board[5][6] = "P"; @board[5][7] = "B";
-    @board[6][0] = "n"; @board[6][1] = "p"; @board[6][6] = "P"; @board[6][7] = "N";
-    @board[7][0] = "r"; @board[7][1] = "p"; @board[7][6] = "P"; @board[7][7] = "R";
+    $board[0][0] = "r"; $board[0][1] = "p"; $board[0][6] = "P"; $board[0][7] = "R";
+    $board[1][0] = "n"; $board[1][1] = "p"; $board[1][6] = "P"; $board[1][7] = "N";
+    $board[2][0] = "b"; $board[2][1] = "p"; $board[2][6] = "P"; $board[2][7] = "B";
+    $board[3][0] = "q"; $board[3][1] = "p"; $board[3][6] = "P"; $board[3][7] = "Q";
+    $board[4][0] = "k"; $board[4][1] = "p"; $board[4][6] = "P"; $board[4][7] = "K";
+    $board[5][0] = "b"; $board[5][1] = "p"; $board[5][6] = "P"; $board[5][7] = "B";
+    $board[6][0] = "n"; $board[6][1] = "p"; $board[6][6] = "P"; $board[6][7] = "N";
+    $board[7][0] = "r"; $board[7][1] = "p"; $board[7][6] = "P"; $board[7][7] = "R";
 
   end
 
@@ -81,7 +69,7 @@ class GameBoard
         set_board
       end
       #draw = check_for_draw
-      won = check_for_win
+      #won = check_for_win
     end
     won ? win : draw
   end
@@ -89,18 +77,18 @@ class GameBoard
   def turn
     player = @turn_number.even? ? @player2 : @player1
     from_square = player.take_turn_from(@options)
-    @move_piece = @board[from_square[0]][from_square[1]]
+    @move_piece = $board[from_square[0]][from_square[1]]
     to_square = player.take_turn_to(@options)
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
   end
 
   def delete_disc(player=nil, from_square1, from_square2)
-    @board[from_square1][from_square2] = " "
+    $board[from_square1][from_square2] = " "
   end
 
   def add_disc(player=nil, to_square1, to_square2)
-    @board[to_square1][to_square2] = @move_piece
+    $board[to_square1][to_square2] = @move_piece
   end
 
   def check_for_win
