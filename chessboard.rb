@@ -8,7 +8,7 @@ class GameBoard
     $board = Array.new(8) { Array.new(8, ' ') }
     @player1 = Player.new(name1, ['r', 'n', 'b', 'q', 'k', 'p'])
     @player2 = Player.new(name2, ['R', 'N', 'B', 'Q', 'K', 'P'])
-    @move_piece = move_piece
+    $move_piece = move_piece
     @set_board = set_board
     @turn_number = 1
     @options = [0, 1, 2, 3, 4, 5, 6, 7].repeated_permutation(2).to_a.map {|x| x.join.to_i}
@@ -77,9 +77,10 @@ class GameBoard
   def turn
     player = @turn_number.even? ? @player2 : @player1
     from_square = player.take_turn_from(@options)
-    @move_piece = $board[from_square[0]][from_square[1]]
-    to_square = player.take_turn_to(@options)
+    $move_piece = $board[from_square[0]][from_square[1]]
     delete_disc(player, from_square[0], from_square[1])
+    to_square = player.take_turn_to(@options)
+
     add_disc(player, to_square[0], to_square[1])
   end
 
@@ -88,7 +89,7 @@ class GameBoard
   end
 
   def add_disc(player=nil, to_square1, to_square2)
-    $board[to_square1][to_square2] = @move_piece
+    $board[to_square1][to_square2] = $move_piece
   end
 
   def check_for_win

@@ -2,11 +2,12 @@ require_relative 'chessboard.rb'
 require_relative 'chesspieces.rb'
 
 class Player
-  attr_accessor :name, :pieces, :from, :to, :chess_piece
+  attr_accessor :name, :pieces, :piece_move, :from, :to, :chess_piece
 
   def initialize(name, pieces=[])
     @name = name
     @pieces = pieces
+    @piece_move = piece_move
     @from = from
     @to = to
     @chess_piece = ChessPieces.new
@@ -30,7 +31,7 @@ class Player
     input2 = stdin.gets.chomp.to_i
     @to = convert_input(input2)
 
-    until options.include?(input2) && valid_moves.include?(input2.to_s) && !@pieces.include?($board[@to[0]][@to[1]])
+    until options.include?(input2) && valid_moves.include?(@to) && !@pieces.include?($board[@to[0]][@to[1]])
       print "That is an incorrect value! Try again:\n> "
       input2 = stdin.gets.chomp.to_i
       @to = convert_input(input2)
@@ -48,9 +49,20 @@ class Player
   end
 
   def valid_moves
-    #if @move_piece == "n" || @move_piece == "N"
+    p $move_piece
+    if $move_piece == "r" || $move_piece == "R"
+      @chess_piece.rook_moves(from)
+    elsif $move_piece == "n" || $move_piece == "N"
       @chess_piece.knight_moves(from)
-    #end
+    elsif $move_piece == "b" || $move_piece == "B"
+      @chess_piece.bishop_moves(from)
+    elsif $move_piece == "q" || $move_piece == "Q"
+      @chess_piece.queen_moves(from)
+    elsif $move_piece == "k" || $move_piece == "K"
+      @chess_piece.king_moves(from)
+    elsif $move_piece == "p" || $move_piece == "P"
+      @chess_piece.pawn_moves(from)
+    end
   end
 
 end
