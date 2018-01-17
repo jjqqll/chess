@@ -18,6 +18,7 @@ class Player
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
 
+    # verify 1. input is within board, 2. player is selecting their own chess pieces
     until options.include?(input1) && @pieces.include?($board[@from[0]][@from[1]])
       print "That is an incorrect value! Try again:\n> "
       input1 = stdin.gets.chomp.to_i
@@ -31,11 +32,13 @@ class Player
     input2 = stdin.gets.chomp.to_i
     @to = convert_input(input2)
 
+    # verify 1. input is w/i board, 2. chess pieces are making valid moves, 3. pieces don't capture their own
     until options.include?(input2) && valid_moves.include?(@to) && !@pieces.include?($board[@to[0]][@to[1]])
       print "That is an incorrect value! Try again:\n> "
       input2 = stdin.gets.chomp.to_i
       @to = convert_input(input2)
     end
+
     convert_input(input2)
   end
 
@@ -51,7 +54,7 @@ class Player
   def valid_moves
     p $move_piece
     if $move_piece == "r" || $move_piece == "R"
-      @chess_piece.rook_moves(from)
+      @chess_piece.rook_moves(from, to)
     elsif $move_piece == "n" || $move_piece == "N"
       @chess_piece.knight_moves(from)
     elsif $move_piece == "b" || $move_piece == "B"

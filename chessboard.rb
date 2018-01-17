@@ -2,16 +2,20 @@ require_relative 'chessplayer.rb'
 require_relative 'chesspieces.rb'
 
 class GameBoard
-  attr_accessor :board, :player1, :player2, :move_piece, :set_board, :turn_number, :options
+  attr_accessor :board, :player1, :player2, :move_piece, :set_board, :from_square, :to_square, :turn_number, :options, :wp_promotion_rank, :bp_promotion_rank
 
   def initialize(name1 = "Player 1", name2 = "Player 2")
     $board = Array.new(8) { Array.new(8, ' ') }
     @player1 = Player.new(name1, ['r', 'n', 'b', 'q', 'k', 'p'])
     @player2 = Player.new(name2, ['R', 'N', 'B', 'Q', 'K', 'P'])
+    @from_square = from_square
+    @to_square = to_square
     $move_piece = move_piece
     @set_board = set_board
     @turn_number = 1
     @options = [0, 1, 2, 3, 4, 5, 6, 7].repeated_permutation(2).to_a.map {|x| x.join.to_i}
+    @wp_promotion_rank = [[0, 7], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7]]
+    @bp_promotion_rank = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0]]
   end
 
   def play
@@ -54,10 +58,6 @@ class GameBoard
     print "\nWelcome to Chess!  The player with the white(lower cases) pieces moves first.\n"
   end
 
-#  def on_board(position=[0,0]) # checks if position is within the ChessBoard
-#    position[0].between?(0,7) && position[1].between?(0,7) ? true : false
-#  end
-
   def turns
     won = false
     draw = false
@@ -79,8 +79,7 @@ class GameBoard
     from_square = player.take_turn_from(@options)
     $move_piece = $board[from_square[0]][from_square[1]]
     delete_disc(player, from_square[0], from_square[1])
-    to_square = player.take_turn_to(@options)
-
+    @to_square = player.take_turn_to(@options)
     add_disc(player, to_square[0], to_square[1])
   end
 
@@ -89,7 +88,30 @@ class GameBoard
   end
 
   def add_disc(player=nil, to_square1, to_square2)
+    # pawn promotions
+    if $move_piece == "p" && @wp_promotion_rank.include?(@to_square)
+      print "\n What would you like to promote your pawn to? queen, rook, bishop or knight?"
+      input3 = $stdin.gets.chomp
+      input3
+      until player.pieces.include?(input3)
+        print "That is an incorrect value! Try again:\n"
+        input3 = $stdin.gets.chomp
+      end
+      $board[to_square[0]][to_square[1]] = input3
+
+    elsif $move_piece == "P" && @bp_promotion_rank.include?(to_square)
+      print "\n What would you like to promote your pawn to? queen, rook, bishop or knight?"
+      input3 = $stdin.gets.chomp
+
+      until player.pieces.include?(input3)
+        print "That is an incorrect value! Try again:\n"
+        input3 = $stdin.gets.chomp
+      end
+      $board[to_square[0]][to_square[1]] = input3
+
+    else
     $board[to_square1][to_square2] = $move_piece
+  end
   end
 
   def check_for_win
