@@ -88,9 +88,9 @@ class GameBoard
   end
 
   def add_disc(player=nil, to_square1, to_square2)
-    # pawn promotions
+    # pawn promotion
     if $move_piece == "p" && @wp_promotion_rank.include?(@to_square)
-      print "\n What would you like to promote your pawn to? queen, rook, bishop or knight?"
+      print "\n What would you like to promote your pawn to? queen, rook, bishop or knight? "
       input3 = $stdin.gets.chomp
       input3
       until player.pieces.include?(input3)
@@ -100,7 +100,7 @@ class GameBoard
       $board[to_square[0]][to_square[1]] = input3
 
     elsif $move_piece == "P" && @bp_promotion_rank.include?(to_square)
-      print "\n What would you like to promote your pawn to? queen, rook, bishop or knight?"
+      print "\n What would you like to promote your pawn to? queen, rook, bishop or knight? "
       input3 = $stdin.gets.chomp
 
       until player.pieces.include?(input3)
@@ -111,7 +111,7 @@ class GameBoard
 
     else
     $board[to_square1][to_square2] = $move_piece
-  end
+    end
   end
 
   def check_for_win
