@@ -54,13 +54,13 @@ class Player
   def valid_moves
     p $move_piece
     if $move_piece == "r" || $move_piece == "R"
-      @chess_piece.rook_moves(from, to)
+      @chess_piece.rook_moves(from, pieces)
     elsif $move_piece == "n" || $move_piece == "N"
       @chess_piece.knight_moves(from)
     elsif $move_piece == "b" || $move_piece == "B"
-      @chess_piece.bishop_moves(from)
+      @chess_piece.bishop_moves(from, pieces)
     elsif $move_piece == "q" || $move_piece == "Q"
-      @chess_piece.queen_moves(from)
+      @chess_piece.queen_moves(from, pieces)
     elsif $move_piece == "k" || $move_piece == "K"
       @chess_piece.king_moves(from)
     elsif $move_piece == "p" || $move_piece == "P"
