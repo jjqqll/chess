@@ -78,8 +78,8 @@ class GameBoard
     player = @turn_number.even? ? @player2 : @player1
     from_square = player.take_turn_from(@options)
     $move_piece = $board[from_square[0]][from_square[1]]
-    delete_disc(player, from_square[0], from_square[1])
     @to_square = player.take_turn_to(@options)
+    delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
   end
 
