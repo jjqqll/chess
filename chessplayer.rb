@@ -18,15 +18,14 @@ class Player
     print "\n#{@name}, select the square of the chess piece you want to move(column#, then row#).\n> "
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
-    p @possible_piece = $board[@from[0]][@from[1]]
-    p possible_moves
+    selected = $board[@from[0]][@from[1]]
 
     # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves
-    until options.include?(input1) && @pieces.include?($board[@from[0]][@from[1]])# && possible_moves
+    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
-      #valid_moves($board[@from[0]][@from[1]])
+      selected = $board[@from[0]][@from[1]]
     end
     convert_input(input1)
   end
@@ -59,9 +58,10 @@ class Player
     #p $move_piece
     case
     when movepiece == "r" || movepiece == "R"
+      @counter += 1
       @chess_piece.rook_moves(from, pieces)
     when movepiece == "n" || movepiece == "N"
-      @chess_piece.knight_moves(from)
+      @chess_piece.knight_moves(from, pieces)
     when movepiece == "b" || movepiece == "B"
       @chess_piece.bishop_moves(from, pieces)
     when movepiece == "q" || movepiece == "Q"
@@ -74,7 +74,7 @@ class Player
           @chess_piece.castling_k
         end
       else
-        @chess_piece.king_moves(from, to)
+        @chess_piece.king_moves(from, to, pieces)
       end
     when movepiece == "K"
       if @counter == 0
@@ -84,21 +84,11 @@ class Player
           @chess_piece.castling_K
         end
       else
-        @chess_piece.king_moves(from, to)
+        @chess_piece.king_moves(from, to, pieces)
       end
     when movepiece == "p" || movepiece == "P"
-      @chess_piece.pawn_moves(from)
+      @chess_piece.pawn_moves(from, movepiece, pieces)
     end
-  end
-
-  def possible_moves
-    potential_moves = valid_moves(@possible_piece)
-    return true if potential_moves == []
-    potential_moves.each do |move|
-      return true if $board[move[0]][move[1]] == " " 
-    end
-
-    return false
   end
 
 end

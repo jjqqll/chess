@@ -3,7 +3,7 @@ require_relative 'chessplayer.rb'
 
 class ChessPieces
 
-  def knight_moves(from_square=[0,0])
+  def knight_moves(from_square=[0,0], pieces)
     # the knight's 8 possible moves from a position
     moves = [[+1, +2], [+2, +1], [+2, -1], [+1, -2], [-1, -2], [-2, -1], [-2, +1], [-1, +2]]
 
@@ -12,12 +12,14 @@ class ChessPieces
     potential_position = []
     moves.collect do |move|
       potential_position = [from_square[0] + move[0], from_square[1] + move[1]]
-      valid_positions << potential_position # on_board? => verify in Player class
+      # verify if w/i board & does not include own chess piece
+      valid_positions << potential_position if on_board(potential_position) && !pieces.include?($board[potential_position[0]][potential_position[1]])
       end
     valid_positions
   end
 
-  def king_moves(from_square=[0,0], to_square=[0,0])
+
+  def king_moves(from_square=[0,0], to_square=[0,0], pieces)
     moves = [[+1, +0], [+1, -1], [+0, -1], [-1, -1], [-1, +0],
     [-1, +1], [+0, +1], [+1, +1]]
 
@@ -25,7 +27,8 @@ class ChessPieces
     potential_position = []
     moves.collect do |move|
       potential_position = [from_square[0] + move[0], from_square[1] + move[1]]
-      valid_positions << potential_position # on_board? => verify in Player class
+      # verify if w/i board & does not include own chess piece
+      valid_positions << potential_position if on_board(potential_position) && !pieces.include?($board[potential_position[0]][potential_position[1]])
     end
     valid_positions
   end
@@ -34,6 +37,7 @@ class ChessPieces
     moves = [[0, +1], [0, -1], [+1, 0], [-1, 0]]
 
     valid_positions = []
+    potential_positions = []
 
     moves.each do |move|
      x = from_square[0]
@@ -46,23 +50,25 @@ class ChessPieces
        elsif y.between?(0,7) == false
          break
        elsif $board[x][y] == " "  # select if square is empty
-         valid_positions << [x,y]
+         potential_positions << [x,y]
        elsif pieces.include?($board[x,y]) # stop when blocked by own chess piece
          break
        else !pieces.include?($board[x,y]) # stop when blocked(but include it because blocking piece is the oppenent)
-         valid_positions << [x,y]
+         potential_positions << [x,y]
          break
        end
      end
     end
+    # verify if w/i board & does not include own chess piece
+    valid_positions = potential_positions.select { |position| on_board(position) && !pieces.include?($board[position[0]][position[1]]) }
 
-    valid_positions
   end
 
   def bishop_moves(from_square=[0,0], pieces)
     moves = [[+1, +1], [+1, -1], [-1, -1], [-1, +1]]
 
     valid_positions = []
+    potential_positions = []
 
     moves.each do |move|
      x = from_square[0]
@@ -75,17 +81,18 @@ class ChessPieces
        elsif y.between?(0,7) == false
          break
        elsif $board[x][y] == " "  # select if square is empty
-         valid_positions << [x,y]
+         potential_positions << [x,y]
        elsif pieces.include?($board[x,y]) # stop when blocked by own chess piece
          break
        else !pieces.include?($board[x,y]) # stop when blocked(but include it because blocking piece is the oppenent)
-         valid_positions << [x,y]
+         potential_positions << [x,y]
          break
        end
      end
     end
 
-    valid_positions
+    # verify if w/i board & does not include own chess piece
+    valid_positions = potential_positions.select { |position| on_board(position) && !pieces.include?($board[position[0]][position[1]]) }
   end
 
   def queen_moves(from_square=[0,0], pieces)
@@ -93,6 +100,7 @@ class ChessPieces
     [+0, +1], [+0, -1], [+1, +0], [-1, +0]]
 
     valid_positions = []
+    potential_positions = []
 
     moves.each do |move|
      x = from_square[0]
@@ -107,18 +115,19 @@ class ChessPieces
        elsif y.between?(0,7) == false
          break
        elsif $board[x][y] == " "  # select if square is empty
-         valid_positions << [x,y]
+         potential_positions << [x,y]
        elsif !pieces.include?($board[x,y]) # stop when blocked(but include it because blocking piece is the oppenent)
-         valid_positions << [x,y]
+         potential_positions << [x,y]
          break
        end
      end
     end
 
-    valid_positions
+    # verify if w/i board & does not include own chess piece
+    valid_positions = potential_positions.select { |position| on_board(position) && !pieces.include?($board[position[0]][position[1]]) }
   end
 
-  def pawn_moves(from_square=[0,0])
+  def pawn_moves(from_square=[0,0], movepiece, pieces)
 
     wp_init_positions = [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1]]
     wp_passant_positions = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]]
@@ -133,78 +142,78 @@ class ChessPieces
     bp_position_infront = $board[from_square[0]+0][from_square[1]-1]
 
     moves = []
-    if $move_piece == "p"
-      if wp_position_infront != " "         # blocked
-        if wp_capture_position1 != " " && wp_capture_position2 != " "      # capture positions are occupied
-          moves = [[+1, +1], [-1, +1]]
-        elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
-          moves = [[+1, +1]]
-        elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
-          moves = [[-1, +1]]
-        end
-      elsif wp_position_infront == " "      # not blocked
-        if wp_init_positions.include?(from_square) # from initial position
-          if wp_capture_position1 == " " && wp_capture_position2 == " "      # nothing in capture positions
-            moves = [[+0, +1], [+0, +2]]
-          elsif wp_capture_position1 != " " && wp_capture_position2 != " "   # capture positions are occupied
-            moves = [[+0, +1], [+0, +2], [+1, +1], [-1, +1]]
-          elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
-            moves = [[+0, +1], [+0, +2], [+1, +1]]
-          elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
-            moves = [[+0, +1], [+0, +2], [-1, +1]]
-          end
-        elsif !wp_init_positions.include?(from_square) # not from initial position
-          if wp_capture_position1 == " " && wp_capture_position2 == " "      # nothing in capture positions
-            moves = [[+0, +1]]
-          elsif wp_capture_position1 != " " && wp_capture_position2 != " "   # capture positions are occupied
-            moves = [[+0, +1], [+1, +1], [-1, +1]]
-          elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
-            moves = [[+0, +1], [+1, +1]]
-          elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
-            moves = [[+0, +1], [-1, +1]]
-          end
-        end
-      end
+    if movepiece == "p"
+     if wp_position_infront != " "         # blocked
+       if wp_capture_position1 != " " && wp_capture_position2 != " "      # capture positions are occupied
+         moves = [[+1, +1], [-1, +1]]
+       elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
+         moves = [[+1, +1]]
+       elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
+         moves = [[-1, +1]]
+       end
+     elsif wp_position_infront == " "      # not blocked
+       if wp_init_positions.include?(from_square) # from initial position
+         if wp_capture_position1 == " " && wp_capture_position2 == " "      # nothing in capture positions
+           moves = [[+0, +1], [+0, +2]]
+         elsif wp_capture_position1 != " " && wp_capture_position2 != " "   # capture positions are occupied
+           moves = [[+0, +1], [+0, +2], [+1, +1], [-1, +1]]
+         elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
+           moves = [[+0, +1], [+0, +2], [+1, +1]]
+         elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
+           moves = [[+0, +1], [+0, +2], [-1, +1]]
+         end
+       elsif !wp_init_positions.include?(from_square) # not from initial position
+         if wp_capture_position1 == " " && wp_capture_position2 == " "      # nothing in capture positions
+           moves = [[+0, +1]]
+         elsif wp_capture_position1 != " " && wp_capture_position2 != " "   # capture positions are occupied
+           moves = [[+0, +1], [+1, +1], [-1, +1]]
+         elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
+           moves = [[+0, +1], [+1, +1]]
+         elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
+           moves = [[+0, +1], [-1, +1]]
+         end
+       end
+     end
 
-      elsif $move_piece == "P"
-        if bp_position_infront != " "         # blocked
-          if bp_capture_position1 != " " && bp_capture_position2 != " "      # capture positions are occupied
-            moves = [[+1, -1], [-1, -1]]
-          elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
-            moves = [[+1, -1]]
-          elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
-            moves = [[-1, -1]]
-          end
-        elsif bp_position_infront == " "      # not blocked
-          if bp_init_positions.include?(from_square) # from initial position
-            if bp_capture_position1 == " " && bp_capture_position2 == " "      # nothing in capture positions
-              moves = [[+0, -1], [+0, -2]]
-            elsif bp_capture_position1 != " " && bp_capture_position2 != " "   # capture positions are occupied
-              moves = [[+0, -1], [+0, -2], [+1, -1], [-1, -1]]
-            elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
-              moves = [[+0, -1], [+0, -2], [+1, -1]]
-            elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
-              moves = [[+0, -1], [+0, -2], [-1, -1]]
-            end
-          elsif !bp_init_positions.include?(from_square) # not from initial position
-            if bp_capture_position1 == " " && bp_capture_position2 == " "      # nothing in capture positions
-              moves = [[+0, -1]]
-            elsif bp_capture_position1 != " " && bp_capture_position2 != " "   # capture positions are occupied
-              moves = [[+0, -1], [+1, -1], [-1, -1]]
-            elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
-              moves = [[+0, -1], [+1, -1]]
-            elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
-              moves = [[+0, -1], [-1, -1]]
-            end
-          end
-        end
+    elsif movepiece == "P"
+     if bp_position_infront != " "         # blocked
+       if bp_capture_position1 != " " && bp_capture_position2 != " "      # capture positions are occupied
+         moves = [[+1, -1], [-1, -1]]
+       elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
+         moves = [[+1, -1]]
+       elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
+         moves = [[-1, -1]]
+       end
+     elsif bp_position_infront == " "      # not blocked
+       if bp_init_positions.include?(from_square) # from initial position
+         if bp_capture_position1 == " " && bp_capture_position2 == " "      # nothing in capture positions
+           moves = [[+0, -1], [+0, -2]]
+         elsif bp_capture_position1 != " " && bp_capture_position2 != " "   # capture positions are occupied
+           moves = [[+0, -1], [+0, -2], [+1, -1], [-1, -1]]
+         elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
+           moves = [[+0, -1], [+0, -2], [+1, -1]]
+         elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
+           moves = [[+0, -1], [+0, -2], [-1, -1]]
+         end
+       elsif !bp_init_positions.include?(from_square) # not from initial position
+         if bp_capture_position1 == " " && bp_capture_position2 == " "      # nothing in capture positions
+           moves = [[+0, -1]]
+         elsif bp_capture_position1 != " " && bp_capture_position2 != " "   # capture positions are occupied
+           moves = [[+0, -1], [+1, -1], [-1, -1]]
+         elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
+           moves = [[+0, -1], [+1, -1]]
+         elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
+           moves = [[+0, -1], [-1, -1]]
+         end
+       end
+     end
     end
 
     valid_positions = []
-    potential_position = []
+
     moves.collect do |move|
-      potential_position = [from_square[0] + move[0], from_square[1] + move[1]]
-      valid_positions << potential_position # if potential_position is not blocked
+     potential_position = [from_square[0] + move[0], from_square[1] + move[1]]
+     valid_positions << potential_position
     end
     valid_positions
   end
@@ -235,6 +244,10 @@ class ChessPieces
       valid_positions = [[2, 7]]
     end
     valid_positions
+  end
+
+  def on_board(from_square=[0,0])
+    from_square[0].between?(0,7) && from_square[1].between?(0,7) ? true : false
   end
 
 end
