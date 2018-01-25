@@ -2,7 +2,7 @@ require_relative 'chessboard.rb'
 require_relative 'chesspieces.rb'
 
 class Player
-  attr_accessor :name, :pieces, :from, :to, :chess_piece, :counter, :possible_piece
+  attr_accessor :name, :pieces, :from, :to, :chess_piece, :possible_piece
 
   def initialize(name, pieces=[])
     @name = name
@@ -11,7 +11,6 @@ class Player
     @from = from
     @to = to
     @chess_piece = ChessPieces.new
-    @counter = 0
   end
 
   def take_turn_from(options, stdin = $stdin)
@@ -19,12 +18,19 @@ class Player
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
     selected = $board[@from[0]][@from[1]]
+    p "counter_k-before: #{$counter_k}"
+    p "counter_K-before: #{$counter_K}"
+    p valid_moves(selected)
 
     # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves
     until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil
+      p "counter_k-middle: #{$counter_k}"
+      p "counter_K-middle: #{$counter_K}"
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
+      p "counter_k-last: #{$counter_k}"
+      p "counter_K-last: #{$counter_K}"
       selected = $board[@from[0]][@from[1]]
     end
     convert_input(input1)
@@ -43,6 +49,15 @@ class Player
     end
 
     convert_input(input2)
+
+  #  # en passant
+  #  x = @counter_verify
+  #  if @counter_verify == x && $move_piece = "p" && from(init pos) && to(en passant pos) && en pas(left or right) == "P"
+  #    if @counter_verify == x + 1 && $move_piece && en pas(left) = "P" || en pas(right) = "P"
+  #
+  #  elsif @counter_verify == x && $move_piece = "P" && from(init pos) && to(en passant pos) && en pas(left or right) == "p"
+  #  end
+
   end
 
   def convert_input(input)
@@ -58,7 +73,6 @@ class Player
     #p $move_piece
     case
     when movepiece == "r" || movepiece == "R"
-      @counter += 1
       @chess_piece.rook_moves(from, pieces)
     when movepiece == "n" || movepiece == "N"
       @chess_piece.knight_moves(from, pieces)
@@ -67,26 +81,31 @@ class Player
     when movepiece == "q" || movepiece == "Q"
       @chess_piece.queen_moves(from, pieces)
     when movepiece == "k"
-      if @counter == 0
-        if from == [4,0] && to == [6,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' ' ||
-          from == [4,0] && to == [2,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' '
-          @counter += 1
-          @chess_piece.castling_k
+      if $counter_k == 0
+        if from == [4,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' ' #&& to == [6,0]
+          @chess_piece.king_moves(from, pieces) << [6,0]
+        elsif from == [4,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' ' #&& to == [2,0]
+          @chess_piece.king_moves(from, to, pieces) << [2,0]
+        else
+          @chess_piece.king_moves(from, to, pieces)
         end
       else
         @chess_piece.king_moves(from, to, pieces)
       end
     when movepiece == "K"
-      if @counter == 0
-        if from == [4,7] && to == [6,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' ' ||
-          from == [4,7] && to == [2,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' '
-          @counter += 1
-          @chess_piece.castling_K
+      if $counter_K == 0
+        if from == [4,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' ' #&& to == [6,7]
+          @chess_piece.king_moves(from, to, pieces) << [6,7]
+        elsif from == [4,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' ' #&& to == [2,7]
+          @chess_piece.king_moves(from, to, pieces) << [2,7]
+        else
+          @chess_piece.king_moves(from, to, pieces)
         end
       else
         @chess_piece.king_moves(from, to, pieces)
       end
     when movepiece == "p" || movepiece == "P"
+      #@counter_p += 1
       @chess_piece.pawn_moves(from, movepiece, pieces)
     end
   end

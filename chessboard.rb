@@ -16,6 +16,8 @@ class GameBoard
     @options = [0, 1, 2, 3, 4, 5, 6, 7].repeated_permutation(2).to_a.map {|x| x.join.to_i}
     @wp_promotion_rank = [[0, 7], [1, 7], [2, 7], [3, 7], [4, 7], [5, 7], [6, 7], [7, 7]]
     @bp_promotion_rank = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0]]
+    $counter_k = 0
+    $counter_K = 0
   end
 
   def play
@@ -79,8 +81,10 @@ class GameBoard
     from_square = player.take_turn_from(@options)
     $move_piece = $board[from_square[0]][from_square[1]]
     @to_square = player.take_turn_to(@options)
+    castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
+
   end
 
   def delete_disc(player=nil, from_square1, from_square2)
@@ -111,6 +115,48 @@ class GameBoard
 
     else
     $board[to_square1][to_square2] = $move_piece
+    end
+  end
+
+  def castling
+    if $move_piece == "k" || $move_piece == "r"
+      castling_k
+    elsif $move_piece == "K" || $move_piece == "R"
+      castling_K
+    end
+  end
+
+  def castling_k
+    if $counter_k == 0
+      case
+      when $move_piece == "k" && $board[4][0] == 'k' && to_square == [6,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' '
+        $board[5][0] = 'r'
+        $board[7][0] = ' '
+        $counter_k += 1
+      when $move_piece == "k" && $board[4][0] == 'k' && to_square == [2,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' '
+        $board[3][0] = 'r'
+        $board[0][0] = ' '
+        $counter_k += 1
+      else
+        $counter_k += 1
+      end
+    end
+  end
+
+  def castling_K
+    if $counter_K == 0
+      case
+      when $move_piece == "K" && $board[4][7] == 'K' && to_square == [6,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' '
+        $board[5][7] = 'R'
+        $board[7][7] = ' '
+        $counter_K += 1
+      when $move_piece == "K" && $board[4][7] == 'K' && to_square == [2,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' '
+        $board[3][7] = 'R'
+        $board[0][7] = ' '
+        $counter_K += 1
+      else
+        $counter_K += 1
+      end
     end
   end
 
