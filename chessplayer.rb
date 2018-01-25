@@ -49,15 +49,6 @@ class Player
     end
 
     convert_input(input2)
-
-  #  # en passant
-  #  x = @counter_verify
-  #  if @counter_verify == x && $move_piece = "p" && from(init pos) && to(en passant pos) && en pas(left or right) == "P"
-  #    if @counter_verify == x + 1 && $move_piece && en pas(left) = "P" || en pas(right) = "P"
-  #
-  #  elsif @counter_verify == x && $move_piece = "P" && from(init pos) && to(en passant pos) && en pas(left or right) == "p"
-  #  end
-
   end
 
   def convert_input(input)

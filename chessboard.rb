@@ -2,10 +2,11 @@ require_relative 'chessplayer.rb'
 require_relative 'chesspieces.rb'
 
 class GameBoard
-  attr_accessor :board, :player1, :player2, :move_piece, :set_board, :from_square, :to_square, :turn_number, :options, :wp_promotion_rank, :bp_promotion_rank
+  attr_accessor :board, :player, :player1, :player2, :move_piece, :set_board, :from_square, :to_square, :turn_number, :options, :wp_promotion_rank, :bp_promotion_rank
 
   def initialize(name1 = "Player 1", name2 = "Player 2")
     $board = Array.new(8) { Array.new(8, ' ') }
+    @player = player
     @player1 = Player.new(name1, ['r', 'n', 'b', 'q', 'k', 'p'])
     @player2 = Player.new(name2, ['R', 'N', 'B', 'Q', 'K', 'P'])
     @from_square = from_square
@@ -77,10 +78,10 @@ class GameBoard
   end
 
   def turn
-    player = @turn_number.even? ? @player2 : @player1
-    from_square = player.take_turn_from(@options)
+    @player = @turn_number.even? ? @player2 : @player1
+    @from_square = @player.take_turn_from(@options)
     $move_piece = $board[from_square[0]][from_square[1]]
-    @to_square = player.take_turn_to(@options)
+    @to_square = @player.take_turn_to(@options)
     castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
@@ -89,6 +90,17 @@ class GameBoard
 
   def delete_disc(player=nil, from_square1, from_square2)
     $board[from_square1][from_square2] = " "
+    en_passant_delete
+#    en_passant_delete
+#    wp_passant_positions = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]]
+#    bp_passant_positions = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]]
+#    enpassant_captures = [[from_square1-1, from_square2], [from_square1+1, from_square2]]
+#
+#    if $move_piece == "p" && wp_passant_positions.include?([from_square1, from_square2]) && enpassant_captures.include?([@to_square[0], @to_square[1]-1])
+#      $board[@to_square[0]][@to_square[1]-1] = " "
+#    elsif $move_piece == "P" && bp_passant_positions.include?([from_square1, from_square2]) && enpassant_captures.include?([@to_square[0], @to_square[1]+1])
+#      $board[@to_square[0]][@to_square[1]+1] = " "
+#    end
   end
 
   def add_disc(player=nil, to_square1, to_square2)
@@ -96,7 +108,7 @@ class GameBoard
     if $move_piece == "p" && @wp_promotion_rank.include?(@to_square)
       print "\n What would you like to promote your pawn to? queen, rook, bishop or knight? "
       input3 = $stdin.gets.chomp
-      input3
+
       until player.pieces.include?(input3)
         print "That is an incorrect value! Try again:\n"
         input3 = $stdin.gets.chomp
@@ -114,7 +126,20 @@ class GameBoard
       $board[to_square[0]][to_square[1]] = input3
 
     else
-    $board[to_square1][to_square2] = $move_piece
+
+      $board[to_square1][to_square2] = $move_piece
+    end
+  end
+
+  def en_passant_delete
+    wp_passant_positions = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]]
+    bp_passant_positions = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]]
+    enpassant_captures = [[@from_square[0]-1, @from_square[1]], [@from_square[0]+1, @from_square[1]]]
+
+    if $move_piece == "p" && wp_passant_positions.include?(@from_square) && enpassant_captures.include?([@to_square[0], @to_square[1]-1])
+      $board[@to_square[0]][@to_square[1]-1] = " "
+    elsif $move_piece == "P" && bp_passant_positions.include?(@from_square) && enpassant_captures.include?([@to_square[0], @to_square[1]+1])
+      $board[@to_square[0]][@to_square[1]+1] = " "
     end
   end
 

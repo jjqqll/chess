@@ -131,27 +131,37 @@ class ChessPieces
 
     wp_init_positions = [[0, 1], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [7, 1]]
     wp_passant_positions = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]]
-    wp_capture_position1 = from_square[0] == 7 ? $board[from_square[0]][from_square[1]+1] : $board[from_square[0]+1][from_square[1]+1] # to restrict files 7
-    wp_capture_position2 = $board[from_square[0]-1][from_square[1]+1] # to restrict files 0
+    wp_capture_position1 = from_square[0] == 7 ? $board[from_square[0]-1][from_square[1]+1] : $board[from_square[0]+1][from_square[1]+1] # to restrict files 7
+    wp_capture_position2 = from_square[0] == 0 ? $board[from_square[0]+1][from_square[1]+1] : $board[from_square[0]-1][from_square[1]+1] # to restrict files 0
     wp_position_infront = $board[from_square[0]+0][from_square[1]+1]
 
     bp_init_positions = [[0, 6], [1, 6], [2, 6], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6]]
     bp_passant_positions = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]]
-    bp_capture_position1 = from_square[0] == 7 ? $board[from_square[0]][from_square[1]-1] : $board[from_square[0]+1][from_square[1]-1] # to restrict files 7
-    bp_capture_position2 = $board[from_square[0]-1][from_square[1]-1] # to restrict files 0
+    bp_capture_position1 = from_square[0] == 7 ? $board[from_square[0]-1][from_square[1]-1] : $board[from_square[0]+1][from_square[1]-1] # to restrict files 7
+    bp_capture_position2 = from_square[0] == 0 ? $board[from_square[0]+1][from_square[1]-1] : $board[from_square[0]-1][from_square[1]-1] # to restrict files 0
     bp_position_infront = $board[from_square[0]+0][from_square[1]-1]
+    left_square = $board[from_square[0]-1][from_square[1]] if from_square[0].between?(1,7)
+    right_square = $board[from_square[0]+1][from_square[1]] if from_square[0].between?(0,6)
 
     moves = []
     if movepiece == "p"
       if wp_position_infront != " "         # blocked
+
         if wp_passant_positions.include?(from_square) # from en passant position
-          if $board[from_square[0]-1][from_square[1]] && $board[from_square[0]+1][from_square[1]] == "P"
-            moves = [[-1, +1], [+1, +1]]
-          elsif $board[from_square[0]-1][from_square[1]] == "P"
-            moves = [[-1, +1]]
-          elsif $board[from_square[0]+1][from_square[1]] == "P"
+          if from_square[0].between?(1,6)
+            if left_square && right_square == "P"
+              moves = [[-1, +1], [+1, +1]]
+            elsif left_square == "P"
+              moves = [[-1, +1]]
+            elsif right_square == "P"
+              moves = [[+1, +1]]
+            end
+          elsif from_square[0] == 0 && right_square == "P"
             moves = [[+1, +1]]
+          elsif from_square[0] == 7 && left_square == "P"
+            moves = [[-1, +1]]
           end
+
 
         elsif !wp_passant_positions.include?(from_square) # not from en passant position
           if wp_capture_position1 != " " && wp_capture_position2 != " "      # capture positions are occupied
@@ -165,12 +175,22 @@ class ChessPieces
 
       elsif wp_position_infront == " "      # not blocked
         if wp_passant_positions.include?(from_square) # from en passant position
-          if $board[from_square[0]-1][from_square[1]] && $board[from_square[0]+1][from_square[1]] == "P"
-            moves = [[-1, +1], [+1, +1], [0, +1]]
-          elsif $board[from_square[0]-1][from_square[1]] == "P"
-            moves = [[-1, +1], [0, +1]]
-          elsif $board[from_square[0]+1][from_square[1]] == "P"
+          if from_square[0].between?(0,6)
+            if left_square && right_square == "P"
+              moves = [[-1, +1], [+1, +1], [0, +1]]
+            elsif left_square == "P"
+              moves = [[-1, +1], [0, +1]]
+            elsif right_square == "P"
+              moves = [[+1, +1], [0, +1]]
+            else
+              moves = [[0, +1]]
+            end
+          elsif from_square[0] == 0 && right_square == "P"
             moves = [[+1, +1], [0, +1]]
+          elsif from_square[0] == 7 && left_square == "P"
+            moves = [[-1, +1], [0, +1]]
+          else
+            moves = [[0, +1]]
           end
 
         elsif wp_init_positions.include?(from_square) # from initial position
@@ -200,15 +220,21 @@ class ChessPieces
     elsif movepiece == "P"
       if bp_position_infront != " "         # blocked
         if bp_passant_positions.include?(from_square) # from en passant position
-          if $board[from_square[0]-1][from_square[1]] == "p" && $board[from_square[0]+1][from_square[1]] == "p"
-            moves = [[-1, -1], [+1, -1]]
-          elsif $board[from_square[0]-1][from_square[1]] == "p"
-            moves = [[-1, -1]]
-          elsif $board[from_square[0]+1][from_square[1]] == "p"
+          if from_square[0].between?(1,6)
+            if left_square && right_square == "p"
+              moves = [[-1, -1], [+1, -1]]
+            elsif left_square == "p"
+              moves = [[-1, -1]]
+            elsif right_square == "p"
+              moves = [[+1, -1]]
+            end
+          elsif from_square[0] == 0 && right_square == "p"
             moves = [[+1, -1]]
+          elsif from_square[0] == 7 && left_square == "p"
+            moves = [[-1, -1]]
           end
-        elsif !bp_passant_positions.include?(from_square) # not from en passant position
 
+        elsif !bp_passant_positions.include?(from_square) # not from en passant position
           if bp_capture_position1 != " " && bp_capture_position2 != " "      # capture positions are occupied
             moves = [[+1, -1], [-1, -1]]
           elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
@@ -219,12 +245,22 @@ class ChessPieces
         end
       elsif bp_position_infront == " "      # not blocked
         if bp_passant_positions.include?(from_square) # from en passant position
-          if $board[from_square[0]-1][from_square[1]] == "p" && $board[from_square[0]+1][from_square[1]] == "p"
-            moves = [[-1, -1], [+1, -1], [0, -1]]
-          elsif $board[from_square[0]-1][from_square[1]] == "p"
-            moves = [[-1, -1], [0, -1]]
-          elsif $board[from_square[0]+1][from_square[1]] == "p"
+          if from_square[0].between?(0,6)
+            if left_square == "p" && right_square == "p"
+              moves = [[-1, -1], [+1, -1], [0, -1]]
+            elsif left_square == "p"
+              moves = [[-1, -1], [0, -1]]
+            elsif right_square == "p"
+              moves = [[+1, -1], [0, -1]]
+            else
+              moves = [[0, -1]]
+            end
+          elsif from_square[0] == 0 && right_square == "p"
             moves = [[+1, -1], [0, -1]]
+          elsif from_square[0] == 7 && left_square == "p"
+            moves = [[-1, -1], [0, -1]]
+          else
+            moves = [[0, -1]]
           end
 
         elsif bp_init_positions.include?(from_square) # from initial position
