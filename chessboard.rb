@@ -91,16 +91,6 @@ class GameBoard
   def delete_disc(player=nil, from_square1, from_square2)
     $board[from_square1][from_square2] = " "
     en_passant_delete
-#    en_passant_delete
-#    wp_passant_positions = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]]
-#    bp_passant_positions = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]]
-#    enpassant_captures = [[from_square1-1, from_square2], [from_square1+1, from_square2]]
-#
-#    if $move_piece == "p" && wp_passant_positions.include?([from_square1, from_square2]) && enpassant_captures.include?([@to_square[0], @to_square[1]-1])
-#      $board[@to_square[0]][@to_square[1]-1] = " "
-#    elsif $move_piece == "P" && bp_passant_positions.include?([from_square1, from_square2]) && enpassant_captures.include?([@to_square[0], @to_square[1]+1])
-#      $board[@to_square[0]][@to_square[1]+1] = " "
-#    end
   end
 
   def add_disc(player=nil, to_square1, to_square2)
@@ -115,7 +105,7 @@ class GameBoard
       end
       $board[to_square[0]][to_square[1]] = input3
 
-    elsif $move_piece == "P" && @bp_promotion_rank.include?(to_square)
+    elsif $move_piece == "P" && @bp_promotion_rank.include?(@to_square)
       print "\n What would you like to promote your pawn to? queen, rook, bishop or knight? "
       input3 = $stdin.gets.chomp
 
@@ -124,7 +114,6 @@ class GameBoard
         input3 = $stdin.gets.chomp
       end
       $board[to_square[0]][to_square[1]] = input3
-
     else
 
       $board[to_square1][to_square2] = $move_piece
@@ -185,7 +174,7 @@ class GameBoard
     end
   end
 
-  def check_for_win
+  def checkmate
     return true if check_horizontal_wins || check_vertical_wins || check_diagonal_wins
     false
   end

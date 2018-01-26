@@ -19,7 +19,7 @@ class ChessPieces
   end
 
 
-  def king_moves(from_square=[0,0], to_square=[0,0], pieces)
+  def king_moves(from_square=[0,0], pieces)
     moves = [[+1, +0], [+1, -1], [+0, -1], [-1, -1], [-1, +0],
     [-1, +1], [+0, +1], [+1, +1]]
 
@@ -42,7 +42,7 @@ class ChessPieces
     moves.each do |move|
      x = from_square[0]
      y = from_square[1]
-     loop do  # loop through each possible square from 'from_square'
+     loop do  # loop through each possible square. starting at 'from_square', between 0 and 7.
        x += move[0]
        y += move[1]
        if x.between?(0,7) == false # make sure square is w/i board
@@ -73,7 +73,7 @@ class ChessPieces
     moves.each do |move|
      x = from_square[0]
      y = from_square[1]
-     loop do  # loop through each possible square from 'from_square'
+     loop do  # loop through each possible square. starting at 'from_square', between 0 and 7.
        x += move[0]
        y += move[1]
        if x.between?(0,7) == false # make sure square is w/i board
@@ -105,7 +105,7 @@ class ChessPieces
     moves.each do |move|
      x = from_square[0]
      y = from_square[1]
-     loop do  # loop through each possible square from 'from_square'
+     loop do  # loop through each possible square. starting at 'from_square', between 0 and 7.
        x += move[0]
        y += move[1]
        if pieces.include?($board[x,y]) # stop when blocked by own chess piece
@@ -174,6 +174,7 @@ class ChessPieces
         end
 
       elsif wp_position_infront == " "      # not blocked
+
         if wp_passant_positions.include?(from_square) # from en passant position
           if from_square[0].between?(0,6)
             if left_square && right_square == "P"
@@ -183,7 +184,15 @@ class ChessPieces
             elsif right_square == "P"
               moves = [[+1, +1], [0, +1]]
             else
-              moves = [[0, +1]]
+              if wp_capture_position1 == " " && wp_capture_position2 == " "      # nothing in capture positions
+                moves = [[+0, +1]]
+              elsif wp_capture_position1 != " " && wp_capture_position2 != " "   # capture positions are occupied
+                moves = [[+0, +1], [+1, +1], [-1, +1]]
+              elsif wp_capture_position1 != " " && wp_capture_position2 == " "   # opponent in one capture position
+                moves = [[+0, +1], [+1, +1]]
+              elsif wp_capture_position2 != " " && wp_capture_position1 == " "   # opponent in other capture position
+                moves = [[+0, +1], [-1, +1]]
+              end
             end
           elsif from_square[0] == 0 && right_square == "P"
             moves = [[+1, +1], [0, +1]]
@@ -219,6 +228,7 @@ class ChessPieces
 
     elsif movepiece == "P"
       if bp_position_infront != " "         # blocked
+
         if bp_passant_positions.include?(from_square) # from en passant position
           if from_square[0].between?(1,6)
             if left_square && right_square == "p"
@@ -243,7 +253,9 @@ class ChessPieces
             moves = [[-1, -1]]
           end
         end
+
       elsif bp_position_infront == " "      # not blocked
+
         if bp_passant_positions.include?(from_square) # from en passant position
           if from_square[0].between?(0,6)
             if left_square == "p" && right_square == "p"
@@ -253,7 +265,15 @@ class ChessPieces
             elsif right_square == "p"
               moves = [[+1, -1], [0, -1]]
             else
-              moves = [[0, -1]]
+              if bp_capture_position1 == " " && bp_capture_position2 == " "      # nothing in capture positions
+                moves = [[+0, -1]]
+              elsif bp_capture_position1 != " " && bp_capture_position2 != " "   # capture positions are occupied
+                moves = [[+0, -1], [+1, -1], [-1, -1]]
+              elsif bp_capture_position1 != " " && bp_capture_position2 == " "   # opponent in one capture position
+                moves = [[+0, -1], [+1, -1]]
+              elsif bp_capture_position2 != " " && bp_capture_position1 == " "   # opponent in other capture position
+                moves = [[+0, -1], [-1, -1]]
+              end
             end
           elsif from_square[0] == 0 && right_square == "p"
             moves = [[+1, -1], [0, -1]]
