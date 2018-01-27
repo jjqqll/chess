@@ -85,7 +85,7 @@ class GameBoard
     castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
-
+    #check
   end
 
   def delete_disc(player=nil, from_square1, from_square2)
@@ -172,6 +172,10 @@ class GameBoard
         $counter_K += 1
       end
     end
+  end
+
+  def check
+    does the king
   end
 
   def checkmate

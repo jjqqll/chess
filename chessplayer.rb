@@ -18,9 +18,11 @@ class Player
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
     selected = $board[@from[0]][@from[1]]
+    p king_position
+    # check
 
-    # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves 4. NOT CHECK
-    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil
+    # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves 4. NOT CHECK of own king
+    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil #&& check(own king) == false
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
@@ -100,5 +102,46 @@ class Player
       @chess_piece.king_moves(from, pieces)
     end
   end
+
+  def king_position
+    king = pieces.include?("k") ? "k" : "K"
+
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        return king_position = [x, y] if $board[x][y] == king
+      end
+    end
+  end
+
+#  def check
+#    opponent_pieces = pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+#    0.upto(7) do |x|
+#      0.upto(7) do |y|
+#        # valid_piece is opponent's pieces
+#        opponent_piece = $board[x][y] if opponent_pieces.include?($board[x][y])
+#        # opponent piece's valid positions include your king's position
+#        case
+#        when opponent_piece == "r" || opponent_piece == "R"
+#          @chess_piece.rook_moves(from, pieces)
+#        when movepiece == "n" || movepiece == "N"
+#          @chess_piece.knight_moves(from, pieces)
+#        when movepiece == "b" || movepiece == "B"
+#          @chess_piece.bishop_moves(from, pieces)
+#        when movepiece == "q" || movepiece == "Q"
+#          @chess_piece.queen_moves(from, pieces)
+#        when movepiece == "k"
+#          moves_of_k
+#        when movepiece == "K"
+#          moves_of_K
+#        when movepiece == "p" || movepiece == "P"
+#          @chess_piece.pawn_moves(from, movepiece, pieces)
+#        end
+#      end
+#        #return true if
+#        p valid_moves(opponent_piece)#.include?(king_position)
+#      end
+#    end
+#    #false
+#  end
 
 end
