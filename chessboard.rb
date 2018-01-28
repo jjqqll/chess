@@ -19,6 +19,7 @@ class GameBoard
     @bp_promotion_rank = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0]]
     $counter_k = 0
     $counter_K = 0
+    @chesspieces = ChessPieces.new
   end
 
   def play
@@ -85,7 +86,7 @@ class GameBoard
     castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
-    #check
+    p "CHECK" if check
   end
 
   def delete_disc(player=nil, from_square1, from_square2)
@@ -174,8 +175,66 @@ class GameBoard
     end
   end
 
+  def opponent_king_position
+    opponent_king = ["r", "n", "b", "q", "k", "p"].include?($board[@from_square[0]][@from_square[1]]) ? "k" : "K"
+
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        return opponent_king_position = [x, y] if $board[x][y] == opponent_king
+      end
+    end
+  end
+
   def check
-    does the king
+    your_pieces = ["r", "n", "b", "q", "k", "p"].include?($board[@from_square[0]][@from_square[1]]) ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+    check = []
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        # pick out all your pieces
+        your_piece = $board[x][y] if your_pieces.include?($board[x][y])
+        # to see if your pieces' capture positions include opponent's king's position
+        case
+        when your_piece == "r" || your_piece == "R"
+            opponent_capture_positions = @chesspieces.rook_moves([x,y], your_pieces)
+          when your_piece == "n" || your_piece == "N"
+            opponent_capture_positions = @chesspieces.knight_moves([x,y], your_pieces)
+          when your_piece == "b" || your_piece == "B"
+            opponent_capture_positions = @chesspieces.bishop_moves([x,y], your_pieces)
+          when your_piece == "q" || your_piece == "Q"
+            opponent_capture_positions = @chesspieces.queen_moves([x,y], your_pieces)
+          when your_piece == "k"
+            opponent_capture_positions =
+            if $counter_k == 0
+              if [x,y] == [4,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' '
+                @chesspieces.king_moves([x,y], your_pieces) << [6,0]
+              elsif [x,y] == [4,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' '
+                @chesspieces.king_moves([x,y], your_pieces) << [2,0]
+              else
+                @chesspieces.king_moves([x,y], your_pieces)
+              end
+            else
+              @chesspieces.king_moves([x,y], your_pieces)
+            end
+          when your_piece == "K"
+            opponent_capture_positions =
+            if $counter_K == 0
+              if [x,y] == [4,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' '
+                @chesspieces.king_moves([x,y], your_pieces) << [6,7]
+              elsif [x,y] == [4,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' '
+                @chesspieces.king_moves([x,y], your_pieces) << [2,7]
+              else
+                @chesspieces.king_moves([x,y], your_pieces)
+              end
+            else
+              @chesspieces.king_moves([x,y], your_pieces)
+            end
+          when your_piece == "p" || your_piece == "P"
+            opponent_capture_positions = @chesspieces.pawn_moves([x,y], your_piece, your_pieces)
+        end
+        check << opponent_capture_positions if opponent_capture_positions != nil && opponent_capture_positions != []
+      end
+    end
+    check.flatten(1).include?(opponent_king_position) ? true : false
   end
 
   def checkmate

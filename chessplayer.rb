@@ -18,11 +18,9 @@ class Player
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
     selected = $board[@from[0]][@from[1]]
-    p king_position
-    # check
 
-    # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves 4. NOT CHECK of own king
-    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil #&& check(own king) == false
+    # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves
+    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
@@ -37,8 +35,8 @@ class Player
     input2 = stdin.gets.chomp.to_i
     @to = convert_input(input2)
 
-    # verify 1. input is w/i board, 2. chess pieces are making valid moves, 3. pieces don't capture their own
-    until options.include?(input2) && valid_moves.include?(@to) && !@pieces.include?($board[@to[0]][@to[1]])
+    # verify 1. input is w/i board, 2. chess pieces are making valid moves, 3. pieces don't capture their own, 4. move doesn't put own king in check
+    until options.include?(input2) && valid_moves.include?(@to) && !@pieces.include?($board[@to[0]][@to[1]]) #&& check == false
       print "Invalid selection. Try again:\n> "
       input2 = stdin.gets.chomp.to_i
       @to = convert_input(input2)
@@ -103,6 +101,7 @@ class Player
     end
   end
 
+=begin
   def king_position
     king = pieces.include?("k") ? "k" : "K"
 
@@ -113,35 +112,58 @@ class Player
     end
   end
 
-#  def check
-#    opponent_pieces = pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
-#    0.upto(7) do |x|
-#      0.upto(7) do |y|
-#        # valid_piece is opponent's pieces
-#        opponent_piece = $board[x][y] if opponent_pieces.include?($board[x][y])
-#        # opponent piece's valid positions include your king's position
-#        case
-#        when opponent_piece == "r" || opponent_piece == "R"
-#          @chess_piece.rook_moves(from, pieces)
-#        when movepiece == "n" || movepiece == "N"
-#          @chess_piece.knight_moves(from, pieces)
-#        when movepiece == "b" || movepiece == "B"
-#          @chess_piece.bishop_moves(from, pieces)
-#        when movepiece == "q" || movepiece == "Q"
-#          @chess_piece.queen_moves(from, pieces)
-#        when movepiece == "k"
-#          moves_of_k
-#        when movepiece == "K"
-#          moves_of_K
-#        when movepiece == "p" || movepiece == "P"
-#          @chess_piece.pawn_moves(from, movepiece, pieces)
-#        end
-#      end
-#        #return true if
-#        p valid_moves(opponent_piece)#.include?(king_position)
-#      end
-#    end
-#    #false
-#  end
+  def check(from=@from) # if moved, you will put your own king in check
+    opponent_pieces = pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+    check = []
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        # pick out opponent's pieces so valid_piece is opponent's pieces
+        opponent_piece = $board[x][y] if opponent_pieces.include?($board[x][y])
+        # to see if opponent piece's capture positions include your king's position
+        case
+          when opponent_piece == "r" || opponent_piece == "R"
+            opponent_capture_positions = @chess_piece.rook_moves([x,y], opponent_pieces)
+          when opponent_piece == "n" || opponent_piece == "N"
+            opponent_capture_positions = @chess_piece.knight_moves([x,y], opponent_pieces)
+          when opponent_piece == "b" || opponent_piece == "B"
+            opponent_capture_positions = @chess_piece.bishop_moves([x,y], opponent_pieces)
+          when opponent_piece == "q" || opponent_piece == "Q"
+            opponent_capture_positions = @chess_piece.queen_moves([x,y], opponent_pieces)
+          when opponent_piece == "k"
+            opponent_capture_positions =
+            if $counter_k == 0
+              if [x,y] == [4,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' '
+                @chess_piece.king_moves([x,y], opponent_pieces) << [6,0]
+              elsif [x,y] == [4,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' '
+                @chess_piece.king_moves([x,y], opponent_pieces) << [2,0]
+              else
+                @chess_piece.king_moves([x,y], opponent_pieces)
+              end
+            else
+              @chess_piece.king_moves([x,y], opponent_pieces)
+            end
+          when opponent_piece == "K"
+            opponent_capture_positions =
+            if $counter_K == 0
+              if [x,y] == [4,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' '
+                @chess_piece.king_moves([x,y], opponent_pieces) << [6,7]
+              elsif [x,y] == [4,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' '
+                @chess_piece.king_moves([x,y], opponent_pieces) << [2,7]
+              else
+                @chess_piece.king_moves([x,y], opponent_pieces)
+              end
+            else
+              @chess_piece.king_moves([x,y], opponent_pieces)
+            end
+          when opponent_piece == "p" || opponent_piece == "P"
+            opponent_capture_positions = @chess_piece.pawn_moves([x,y], opponent_piece, opponent_pieces)
+        end
+        check << opponent_capture_positions if opponent_capture_positions != nil && opponent_capture_positions != []
+      end
+    end
+    p check.flatten(1) << from
+    check.flatten(1).include?(king_position) ? true : false
+  end
+=end
 
 end
