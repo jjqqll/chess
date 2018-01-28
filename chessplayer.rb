@@ -18,9 +18,9 @@ class Player
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
     selected = $board[@from[0]][@from[1]]
-
-    # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves
-    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil
+    check(@from)
+    # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves, 4. moving will not put own king in check
+    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil && check == false
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
@@ -101,7 +101,6 @@ class Player
     end
   end
 
-=begin
   def king_position
     king = pieces.include?("k") ? "k" : "K"
 
@@ -114,10 +113,12 @@ class Player
 
   def check(from=@from) # if moved, you will put your own king in check
     opponent_pieces = pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+    from_piece = $board[@from[0]][@from[1]] # save piece in order to add it back at the end
+    $board[@from[0]][@from[1]] = " " # delete piece first in order to find out if opponent_capture_positions include your king
     check = []
     0.upto(7) do |x|
       0.upto(7) do |y|
-        # pick out opponent's pieces so valid_piece is opponent's pieces
+        # select opponent's pieces
         opponent_piece = $board[x][y] if opponent_pieces.include?($board[x][y])
         # to see if opponent piece's capture positions include your king's position
         case
@@ -161,9 +162,8 @@ class Player
         check << opponent_capture_positions if opponent_capture_positions != nil && opponent_capture_positions != []
       end
     end
-    p check.flatten(1) << from
+    $board[@from[0]][@from[1]] = from_piece
     check.flatten(1).include?(king_position) ? true : false
   end
-=end
 
 end

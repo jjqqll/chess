@@ -72,6 +72,7 @@ class GameBoard
       if @turn_number == 1
         set_board
       end
+      print "\n'Check'\n" if check
       #draw = check_for_draw
       #won = check_for_win
     end
@@ -86,7 +87,7 @@ class GameBoard
     castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
-    p "CHECK" if check
+#    p "CHECK" if check
   end
 
   def delete_disc(player=nil, from_square1, from_square2)
