@@ -18,9 +18,9 @@ class Player
     input1 = stdin.gets.chomp.to_i
     @from = convert_input(input1)
     selected = $board[@from[0]][@from[1]]
-    check(@from)
+
     # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves, 4. moving will not put own king in check
-    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil && check == false
+    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil && check(@from) == false  
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
