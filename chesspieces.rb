@@ -35,62 +35,37 @@ class ChessPieces
 
   def rook_moves(from_square=[0,0], pieces=[])
     moves = [[0, +1], [0, -1], [+1, 0], [-1, 0]]
-
-    valid_positions = []
-    potential_positions = []
-
-    moves.each do |move|
-     x = from_square[0]
-     y = from_square[1]
-     loop do  # loop through each possible square. starting at 'from_square', between 0 and 7.
-       x += move[0]
-       y += move[1]
-       if x.between?(0,7) == false # make sure square is w/i board
-         break
-       elsif y.between?(0,7) == false
-         break
-       elsif $board[x][y] == " "  # select if square is empty
-         potential_positions << [x,y]
-       elsif pieces.include?($board[x,y]) # stop when blocked by own chess piece
-         break
-       else !pieces.include?($board[x,y]) # stop when blocked(but include it because blocking piece is the oppenent)
-         potential_positions << [x,y]
-         break
-       end
-     end
-    end
-    # verify if w/i board & does not include own chess piece
-    valid_positions = potential_positions.select { |position| on_board(position) && !pieces.include?($board[position[0]][position[1]]) }
-
+    rbq_moves(from_square, pieces, moves)
   end
 
   def bishop_moves(from_square=[0,0], pieces=[])
     moves = [[+1, +1], [+1, -1], [-1, -1], [-1, +1]]
+    rbq_moves(from_square, pieces, moves)
+  end
 
+  def rbq_moves(from_square=[0,0], pieces=[], moves=[])
     valid_positions = []
     potential_positions = []
-
     moves.each do |move|
-     x = from_square[0]
-     y = from_square[1]
-     loop do  # loop through each possible square. starting at 'from_square', between 0 and 7.
-       x += move[0]
-       y += move[1]
-       if x.between?(0,7) == false # make sure square is w/i board
-         break
-       elsif y.between?(0,7) == false
-         break
-       elsif $board[x][y] == " "  # select if square is empty
-         potential_positions << [x,y]
-       elsif pieces.include?($board[x,y]) # stop when blocked by own chess piece
-         break
-       else !pieces.include?($board[x,y]) # stop when blocked(but include it because blocking piece is the oppenent)
-         potential_positions << [x,y]
-         break
-       end
-     end
+      x = from_square[0]
+      y = from_square[1]
+      loop do  # loop through each possible square. starting at 'from_square', between 0 and 7.
+        x += move[0]
+        y += move[1]
+        if x.between?(0,7) == false # make sure square is w/i board
+          break
+        elsif y.between?(0,7) == false
+          break
+        elsif $board[x][y] == " "  # select if square is empty
+          potential_positions << [x,y]
+        elsif pieces.include?($board[x,y]) # stop when blocked by own chess piece
+          break
+        else !pieces.include?($board[x,y]) # stop when blocked(but include it because blocking piece is the oppenent)
+          potential_positions << [x,y]
+          break
+        end
+      end
     end
-
     # verify if w/i board & does not include own chess piece
     valid_positions = potential_positions.select { |position| on_board(position) && !pieces.include?($board[position[0]][position[1]]) }
   end
