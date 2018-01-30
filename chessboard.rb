@@ -238,38 +238,7 @@ class GameBoard
   end
 
   def checkmate
-    return true if check_horizontal_wins || check_vertical_wins || check_diagonal_wins
-    false
-  end
-
-  def check_horizontal_wins
-    0.upto(5) do |y|
-      0.upto(3) do |x|
-        return true if @board[x][y] != ' ' && @board[x][y] == @board[x+1][y] && @board[x+1][y] == @board[x+2][y] && @board[x+2][y] == @board[x+3][y]
-      end
-    end
-    false
-  end
-
-  def check_vertical_wins
-    0.upto(6) do |x|
-      0.upto(2) do |y|
-        return true if @board[x][y] != ' ' && @board[x][y] == @board[x][y+1] && @board[x][y+1] == @board[x][y+2] && @board[x][y+2] == @board[x][y+3]
-      end
-    end
-    false
-  end
-
-  def check_diagonal_wins
-    0.upto(3) do |x|
-      0.upto(2) do |y|
-        return true if @board[x][y] != ' ' && @board[x][y] == @board[x+1][y+1] && @board[x+1][y+1] == @board[x+2][y+2] && @board[x+2][y+2] == @board[x+3][y+3]
-      end
-
-      3.upto(5) do |y|
-        return true if @board[x][y] != ' ' && @board[x][y] == @board[x+1][y-1] && @board[x+1][y-1] == @board[x+2][y-2] && @board[x+2][y-2] == @board[x+3][y-3]
-      end
-    end
+    return true if you have no possible moves
     false
   end
 
