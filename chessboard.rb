@@ -63,7 +63,6 @@ class GameBoard
   end
 
   def turns
-
     while true
       turn
       display
@@ -71,23 +70,43 @@ class GameBoard
       if @turn_number == 1
         set_board
       end
-       check?(opponent_king_position)
-      p "you are in check" if in_check?(your_king_position)
-    #  break if draw || lost
-    #  print "\n'Check'\n" if in_check?(your_king_position)
-  #    print "\n'Check'\n" if check
-      #draw = check_for_draw
-      #won = check_for_win
+      break if draw || lost
+      #if check?(opponent_king_position) && get_out_of_check_moves == 0
+      #  print "\n'Checkmate'\n"
+      if check?(opponent_king_position)
+        print "\n'Check'\n\n"
+      end
     end
-    puts "It's a draw!" if draw
-    puts "#{player.name}, you won!" if lost
+#    puts "It's a draw!" if draw
+#    puts "#{player.name}, you lost!" if lost
   end
 
   def turn
     @player = @turn_number.even? ? @player2 : @player1
+    if draw || lost
+      puts "It's a draw!" if draw
+      puts "Checkmate!\n\n#{player.name}, you lost!" if lost
+      return
+    end
     @from_square = @player.take_turn_from(@options)
+
+    if in_check?(your_king_position)
+      until get_out_of_check_moves.include?(@from_square)
+        print "Invalid selection. Try again:\n> "
+        @from_square = @player.take_turn_from(@options)
+      end
+    end
+
     $move_piece = $board[from_square[0]][from_square[1]]
     @to_square = @player.take_turn_to(@options)
+
+    if in_check?(your_king_position)
+      until get_out_of_check_moves.include?(@to_square)
+        print "Invalid selection. Try again:\n> "
+        @to_square = @player.take_turn_to(@options)
+      end
+    end
+
     castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
@@ -203,47 +222,59 @@ class GameBoard
     player.pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
   end
 
-  # check if you put opponent in check
-  def check?(coordinate)
-    moves = []
+  def your_pieces
+    player.pieces.include?("k") ? ["r", "n", "b", "q", "k", "p"] : ["R", "N", "B", "Q", "K", "P"]
+  end
+
+  def your_pieces_positions
     your_pieces_positions = []
     0.upto(7) do |x|
       0.upto(7) do |y|
         your_pieces_positions << [x,y] if player.pieces.include?($board[x][y])
       end
     end
-    your_pieces_positions.each { |position| moves << available_moves(position, player.pieces) if position != [] }
-    p moves.flatten(1).include?(coordinate) ? true : false
+    your_pieces_positions
   end
 
-  # check if this coordinate is in check by opponent
-  def in_check?(coordinate)
-    moves = []
+  def opponent_pieces_positions
     opponent_pieces_positions = []
     0.upto(7) do |x|
       0.upto(7) do |y|
         opponent_pieces_positions << [x,y] if opponent_pieces.include?($board[x][y])
       end
     end
-    opponent_pieces_positions.each { |position| moves << available_moves(position, opponent_pieces) if position != [] }
-    p moves.flatten(1).include?(coordinate) ? true : false
+    opponent_pieces_positions
   end
 
-  # return opponent chess piece's available moves
+  # check if you put opponent in check
+  def check?(coordinate)
+    moves = []
+    your_pieces_positions.each { |position| moves << available_moves(position, player.pieces) if position != [] }
+    moves.flatten(1).include?(coordinate) ? true : false
+  end
+
+  # check if this coordinate is in check by opponent
+  def in_check?(coordinate)
+    moves = []
+    opponent_pieces_positions.each { |position| moves << available_moves(position, opponent_pieces) if position != [] }
+    moves.flatten(1).include?(coordinate) ? true : false
+  end
+
+  # return chess piece's available moves
   def available_moves(coordinate, chess_pieces)
-    #opponent_pieces = player.pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+    available_moves = []
     chess_piece = $board[coordinate[0]][coordinate[1]]
     case
       when chess_piece == "r" || chess_piece == "R"
-        return capture_positions = @chesspieces.rook_moves(coordinate, chess_pieces)
+        return available_moves = @chesspieces.rook_moves(coordinate, chess_pieces)
       when chess_piece == "n" || chess_piece == "N"
-        return capture_positions = @chesspieces.knight_moves(coordinate, chess_pieces)
+        return available_moves = @chesspieces.knight_moves(coordinate, chess_pieces)
       when chess_piece == "b" || chess_piece == "B"
-        return capture_positions = @chesspieces.bishop_moves(coordinate, chess_pieces)
+        return available_moves = @chesspieces.bishop_moves(coordinate, chess_pieces)
       when chess_piece == "q" || chess_piece == "Q"
-        return capture_positions = @chesspieces.queen_moves(coordinate, chess_pieces)
+        return available_moves = @chesspieces.queen_moves(coordinate, chess_pieces)
       when chess_piece == "k"
-        return capture_positions =
+        return available_moves =
         if $counter_k == 0
           if coordinate == [4,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' '
             @chesspieces.king_moves(coordinate, chess_pieces) << [6,0]
@@ -256,7 +287,7 @@ class GameBoard
           @chesspieces.king_moves(coordinate, chess_pieces)
         end
       when chess_piece == "K"
-        return capture_positions =
+        return available_moves =
         if $counter_K == 0
           if coordinate == [4,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' '
             @chesspieces.king_moves(coordinate, chess_pieces) << [6,7]
@@ -269,7 +300,7 @@ class GameBoard
           @chesspieces.king_moves(coordinate, chess_pieces)
         end
       when chess_piece == "p" || chess_piece == "P"
-        return capture_positions = @chesspieces.pawn_moves(coordinate, chess_piece, chess_pieces)
+        return available_moves = @chesspieces.pawn_moves(coordinate, chess_piece, chess_pieces)
     end
   end
 
@@ -284,33 +315,26 @@ class GameBoard
     result
   end
 
-  def all_available_moves
-#    your_pieces = player.pieces.include?("k") ? ["r", "n", "b", "q", "k", "p"] : ["R", "N", "B", "Q", "K", "P"]
-
+  def get_out_of_check_moves # any get out of check moves?
     all_available_moves = []
-    all_same_team_coordinates = []
-    0.upto(7) do |x|
-      0.upto(7) do |y|
-        all_same_team_coordinates << [x,y] if player.pieces.include?($board[x][y])
-      end
-    end
-    all_same_team_coordinates.each do |from|
-      available_moves(from, player.pieces).each do |to|
+
+    your_pieces_positions.each do |from|
+      available_moves(from, your_pieces).each do |to|
         if put_king_in_check?(from, to) == false
           all_available_moves << [from, to]
         end
       end
     end
-    all_available_moves
+    all_available_moves.flatten(1)
   end
 
   # no moves available, and your king is in check
   def checkmate
-    all_available_moves.length == 0 && in_check?(your_king_position)
+    get_out_of_check_moves.length == 0 && in_check?(your_king_position)
   end
 
   def stalemate
-    all_available_moves.length == 0 && in_check?(your_king_position) == false
+    get_out_of_check_moves.length == 0 && in_check?(your_king_position) == false
   end
 
   def lost
@@ -321,13 +345,4 @@ class GameBoard
     stalemate
   end
 
-
-  #def win
-  #  winner = @turn_number.even? ? @player1.name : @player2.name
-  #  puts "Congratulations #{winner}, you won!"
-  #end
-
-  #def draw
-  #  puts "Good game players.  That's a draw!"
-  #end
 end
