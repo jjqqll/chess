@@ -20,7 +20,7 @@ class Player
     selected = $board[@from[0]][@from[1]]
 
     # verify 1. input is within board, 2. player is selecting their own chess pieces, 3. there are possible moves, 4. moving will not put own king in check
-    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil && check(@from) == false
+    until options.include?(input1) && @pieces.include?(selected) && valid_moves(selected) != [] && valid_moves(selected) != nil# && check(@from) == false
       print "Invalid selection. Try again:\n> "
       input1 = stdin.gets.chomp.to_i
       @from = convert_input(input1)
@@ -36,7 +36,7 @@ class Player
     @to = convert_input(input2)
 
     # verify 1. input is w/i board, 2. chess pieces are making valid moves, 3. pieces don't capture their own, 4. move doesn't put own king in check
-    until options.include?(input2) && valid_moves.include?(@to) && !@pieces.include?($board[@to[0]][@to[1]]) && check(@to) == false
+    until options.include?(input2) && valid_moves.include?(@to) && !@pieces.include?($board[@to[0]][@to[1]]) #&& check(@to) == false unless
       print "Invalid selection. Try again:\n> "
       input2 = stdin.gets.chomp.to_i
       @to = convert_input(input2)
@@ -112,6 +112,7 @@ class Player
   end
 
   def check(from=@from) # if moved, you will put your own king in check
+
     opponent_pieces = pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
     from_piece = $board[@from[0]][@from[1]] # save piece in order to add it back at the end
     $board[@from[0]][@from[1]] = " " # delete piece first in order to find out if opponent_capture_positions include your king

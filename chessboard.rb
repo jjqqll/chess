@@ -63,20 +63,24 @@ class GameBoard
   end
 
   def turns
-    won = false
-    draw = false
-    until draw #|| won
+
+    while true
       turn
       display
       @turn_number += 1
       if @turn_number == 1
         set_board
       end
-      print "\n'Check'\n" if check
+       check?(opponent_king_position)
+      p "you are in check" if in_check?(your_king_position)
+    #  break if draw || lost
+    #  print "\n'Check'\n" if in_check?(your_king_position)
+  #    print "\n'Check'\n" if check
       #draw = check_for_draw
       #won = check_for_win
     end
-    won ? win : draw
+    puts "It's a draw!" if draw
+    puts "#{player.name}, you won!" if lost
   end
 
   def turn
@@ -87,7 +91,6 @@ class GameBoard
     castling
     delete_disc(player, from_square[0], from_square[1])
     add_disc(player, to_square[0], to_square[1])
-#    p "CHECK" if check
   end
 
   def delete_disc(player=nil, from_square1, from_square2)
@@ -117,14 +120,14 @@ class GameBoard
       end
       $board[to_square[0]][to_square[1]] = input3
     else
-
       $board[to_square1][to_square2] = $move_piece
     end
   end
 
   def en_passant_delete
-    wp_passant_positions = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4], [7, 4]]
-    bp_passant_positions = [[0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3]]
+    wp_passant_positions, bp_passant_positions = [], []
+    0.upto(7) {|x| wp_passant_positions << [x,4]}
+    0.upto(7) {|x| bp_passant_positions << [x,3]}
     enpassant_captures = [[@from_square[0]-1, @from_square[1]], [@from_square[0]+1, @from_square[1]]]
 
     if $move_piece == "p" && wp_passant_positions.include?(@from_square) && enpassant_captures.include?([@to_square[0], @to_square[1]-1])
@@ -186,68 +189,145 @@ class GameBoard
     end
   end
 
-  def check
-    check = []
+  def your_king_position
+    your_king = player.pieces.include?("k") ? "k" : "K"
+
     0.upto(7) do |x|
       0.upto(7) do |y|
-        # pick out all your pieces
-        your_piece = $board[x][y] if player.pieces.include?($board[x][y])
-        # to see if your pieces' capture positions include opponent's king's position
-        case
-        when your_piece == "r" || your_piece == "R"
-            capture_positions = @chesspieces.rook_moves([x,y], player.pieces)
-          when your_piece == "n" || your_piece == "N"
-            capture_positions = @chesspieces.knight_moves([x,y], player.pieces)
-          when your_piece == "b" || your_piece == "B"
-            capture_positions = @chesspieces.bishop_moves([x,y], player.pieces)
-          when your_piece == "q" || your_piece == "Q"
-            capture_positions = @chesspieces.queen_moves([x,y], player.pieces)
-          when your_piece == "k"
-            capture_positions =
-            if $counter_k == 0
-              if [x,y] == [4,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' '
-                @chesspieces.king_moves([x,y], player.pieces) << [6,0]
-              elsif [x,y] == [4,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' '
-                @chesspieces.king_moves([x,y], player.pieces) << [2,0]
-              else
-                @chesspieces.king_moves([x,y], player.pieces)
-              end
-            else
-              @chesspieces.king_moves([x,y], player.pieces)
-            end
-          when your_piece == "K"
-            capture_positions =
-            if $counter_K == 0
-              if [x,y] == [4,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' '
-                @chesspieces.king_moves([x,y], player.pieces) << [6,7]
-              elsif [x,y] == [4,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' '
-                @chesspieces.king_moves([x,y], player.pieces) << [2,7]
-              else
-                @chesspieces.king_moves([x,y], player.pieces)
-              end
-            else
-              @chesspieces.king_moves([x,y], player.pieces)
-            end
-          when your_piece == "p" || your_piece == "P"
-            capture_positions = @chesspieces.pawn_moves([x,y], your_piece, player.pieces)
-        end
-        check << capture_positions if capture_positions != nil && capture_positions != []
+        return your_king_position = [x, y] if $board[x][y] == your_king
       end
     end
-    check.flatten(1).include?(opponent_king_position) ? true : false
   end
 
+  def opponent_pieces
+    player.pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+  end
+
+  # check if you put opponent in check
+  def check?(coordinate)
+    moves = []
+    your_pieces_positions = []
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        your_pieces_positions << [x,y] if player.pieces.include?($board[x][y])
+      end
+    end
+    your_pieces_positions.each { |position| moves << available_moves(position, player.pieces) if position != [] }
+    p moves.flatten(1).include?(coordinate) ? true : false
+  end
+
+  # check if this coordinate is in check by opponent
+  def in_check?(coordinate)
+    moves = []
+    opponent_pieces_positions = []
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        opponent_pieces_positions << [x,y] if opponent_pieces.include?($board[x][y])
+      end
+    end
+    opponent_pieces_positions.each { |position| moves << available_moves(position, opponent_pieces) if position != [] }
+    p moves.flatten(1).include?(coordinate) ? true : false
+  end
+
+  # return opponent chess piece's available moves
+  def available_moves(coordinate, chess_pieces)
+    #opponent_pieces = player.pieces.include?("k") ? ["R", "N", "B", "Q", "K", "P"] : ["r", "n", "b", "q", "k", "p"]
+    chess_piece = $board[coordinate[0]][coordinate[1]]
+    case
+      when chess_piece == "r" || chess_piece == "R"
+        return capture_positions = @chesspieces.rook_moves(coordinate, chess_pieces)
+      when chess_piece == "n" || chess_piece == "N"
+        return capture_positions = @chesspieces.knight_moves(coordinate, chess_pieces)
+      when chess_piece == "b" || chess_piece == "B"
+        return capture_positions = @chesspieces.bishop_moves(coordinate, chess_pieces)
+      when chess_piece == "q" || chess_piece == "Q"
+        return capture_positions = @chesspieces.queen_moves(coordinate, chess_pieces)
+      when chess_piece == "k"
+        return capture_positions =
+        if $counter_k == 0
+          if coordinate == [4,0] && $board[7][0] == 'r' && $board[5][0] && $board[6][0] == ' '
+            @chesspieces.king_moves(coordinate, chess_pieces) << [6,0]
+          elsif coordinate == [4,0] && $board[0][0] == 'r' && $board[1][0] && $board[2][0] && $board[3][0] == ' '
+            @chesspieces.king_moves(coordinate, chess_pieces) << [2,0]
+          else
+            @chesspieces.king_moves(coordinate, chess_pieces)
+          end
+        else
+          @chesspieces.king_moves(coordinate, chess_pieces)
+        end
+      when chess_piece == "K"
+        return capture_positions =
+        if $counter_K == 0
+          if coordinate == [4,7] && $board[7][7] == 'R' && $board[5][7] && $board[6][7] == ' '
+            @chesspieces.king_moves(coordinate, chess_pieces) << [6,7]
+          elsif coordinate == [4,7] && $board[0][7] == 'R' && $board[1][7] && $board[2][7] && $board[3][7] == ' '
+            @chesspieces.king_moves(coordinate, chess_pieces) << [2,7]
+          else
+            @chesspieces.king_moves(coordinate, chess_pieces)
+          end
+        else
+          @chesspieces.king_moves(coordinate, chess_pieces)
+        end
+      when chess_piece == "p" || chess_piece == "P"
+        return capture_positions = @chesspieces.pawn_moves(coordinate, chess_piece, chess_pieces)
+    end
+  end
+
+  def put_king_in_check?(from=@from_square, to=@to_square)
+    from_piece = $board[from[0]][from[1]]
+    to_piece = $board[to[0]][to[1]]
+    $board[to[0]][to[1]] = $board[from[0]][from[1]]
+    $board[from[0]][from[1]] = " "
+    result = in_check?(your_king_position)
+    $board[from[0]][from[1]] = from_piece
+    $board[to[0]][to[1]] = to_piece
+    result
+  end
+
+  def all_available_moves
+#    your_pieces = player.pieces.include?("k") ? ["r", "n", "b", "q", "k", "p"] : ["R", "N", "B", "Q", "K", "P"]
+
+    all_available_moves = []
+    all_same_team_coordinates = []
+    0.upto(7) do |x|
+      0.upto(7) do |y|
+        all_same_team_coordinates << [x,y] if player.pieces.include?($board[x][y])
+      end
+    end
+    all_same_team_coordinates.each do |from|
+      available_moves(from, player.pieces).each do |to|
+        if put_king_in_check?(from, to) == false
+          all_available_moves << [from, to]
+        end
+      end
+    end
+    all_available_moves
+  end
+
+  # no moves available, and your king is in check
   def checkmate
-    return true if you have no possible moves
-    false
+    all_available_moves.length == 0 && in_check?(your_king_position)
   end
 
-  def win
-    winner = @turn_number.even? ? @player1.name : @player2.name
-    puts "Congratulations #{winner}, you won!"
+  def stalemate
+    all_available_moves.length == 0 && in_check?(your_king_position) == false
+  end
+
+  def lost
+    checkmate
   end
 
   def draw
-    puts "Good game players.  That's a draw!"
+    stalemate
   end
+
+
+  #def win
+  #  winner = @turn_number.even? ? @player1.name : @player2.name
+  #  puts "Congratulations #{winner}, you won!"
+  #end
+
+  #def draw
+  #  puts "Good game players.  That's a draw!"
+  #end
 end
