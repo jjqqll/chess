@@ -59,7 +59,7 @@ class GameBoard
   end
 
   def instructions
-    print "\nWelcome to Chess!  The player with the white(lower cases) pieces moves first.\n"
+    print "\nWelcome to Chess!\n\nThe player with the white(lower cases) pieces moves first.\n"
   end
 
   def turns
@@ -83,15 +83,27 @@ class GameBoard
 
   def turn
     @player = @turn_number.even? ? @player2 : @player1
+
     if draw || lost
       puts "It's a draw!" if draw
       puts "Checkmate!\n\n#{player.name}, you lost!" if lost
       return
     end
+
     @from_square = @player.take_turn_from(@options)
 
     if in_check?(your_king_position)
       until get_out_of_check_moves.include?(@from_square)
+        print "Invalid selection. Try again:\n> "
+        @from_square = @player.take_turn_from(@options)
+      end
+#    elsif put_king_at_risk?(@from_square) # moving other pieces will put own king in check
+#      until put_king_at_risk?(@from_square) == false
+#        print "Invalid selection. Try again:\n> "
+#        @from_square = @player.take_turn_from(@options)
+#      end
+    elsif move_king_into_check? # move will put own king into check
+      until move_king_into_check? == false
         print "Invalid selection. Try again:\n> "
         @from_square = @player.take_turn_from(@options)
       end
@@ -100,11 +112,16 @@ class GameBoard
     $move_piece = $board[from_square[0]][from_square[1]]
     @to_square = @player.take_turn_to(@options)
 
-    if in_check?(your_king_position)
-      until get_out_of_check_moves.include?(@to_square)
+    if $move_piece == "k" || $move_piece == "K"
+      until available_moves_for_king.include?(@to_square)
         print "Invalid selection. Try again:\n> "
         @to_square = @player.take_turn_to(@options)
       end
+    elsif in_check?(your_king_position)
+        until get_out_of_check_moves.include?(@to_square)
+          print "Invalid selection. Try again:\n> "
+          @to_square = @player.take_turn_to(@options)
+        end
     end
 
     castling
@@ -313,6 +330,33 @@ class GameBoard
     $board[from[0]][from[1]] = from_piece
     $board[to[0]][to[1]] = to_piece
     result
+  end
+
+=begin
+  def put_king_at_risk?(from=@from_square, to=@to_square)
+    from_piece = $board[from[0]][from[1]]
+    $board[from[0]][from[1]] = " "
+    if from_piece == "k" || from_piece == "K"
+      to_piece = $board[to[0]][to[1]]
+      $board[to[0]][to[1]] = $board[from[0]][from[1]]
+      result = in_check?(to)
+      $board[to[0]][to[1]] = to_piece
+    else
+      result = in_check?(your_king_position)
+    end
+    $board[from[0]][from[1]] = from_piece
+    result
+  end
+=end
+
+  def move_king_into_check?
+    available_moves(@from_square, your_pieces).each { |move| return false if put_king_in_check?(@from_square, move) == false}
+    true
+  end
+
+  def available_moves_for_king
+    moves = available_moves(@from_square, your_pieces).select { |move| put_king_in_check?(@from_square, move) == false}
+    p moves
   end
 
   def get_out_of_check_moves # any get out of check moves?
