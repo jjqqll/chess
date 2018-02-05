@@ -11,28 +11,14 @@ Assignment
 
 Processes:
 - Create ChessBoard class
-- Create ChessPieces class: k, r, b, q, n, p, K, R, B, Q, N, P
+- Create ChessPieces class
+- Create Players
 - Create Game class
+- Add general chess pieces movements
+- Add movement restrictions (i.e. pawn capture, blocking)
+- Add special moves (Promotion, Castling, En passant)
+- Add check, checkmate and draw
 
-Movement:
-- The king(k, K) - moves one square in any direction. The king also has a special move called castling that involves also moving a rook.
-- The rook(r, R) - can move any number of squares along a rank or file, but cannot leap over other pieces. Along with the king, a rook is involved during the king's castling move.
-- The bishop(b, B) - can move any number of squares diagonally, but cannot leap over other pieces.
-- The queen(q, Q) - combines the power of a rook and bishop and can move any number of squares along a rank, file, or diagonal, but cannot leap over other pieces.
-- The knight(n, N) - moves to any of the closest squares that are not on the same rank, file, or diagonal, thus the move forms an "L"-shape: two squares vertically and one square horizontally, or two squares horizontally and one square vertically. The knight is the only piece that can leap over other pieces.
-- The pawn(p, P) - can move forward to the unoccupied square immediately in front of it on the same file, or on its first move it can advance two squares along the same file, provided both squares are unoccupied (black dots in the diagram); or the pawn can capture an opponent's piece on a square diagonally in front of it on an adjacent file, by moving to that square (black "x"s). A pawn has two special moves: the en passant capture and promotion.
-
-Castling: Once in every game, each king is allowed to make a special move, known as castling. Castling consists of moving the king two squares along the first rank toward a rook (which is on the player's first rank[note 2]) and then placing the rook on the last square that the king has just crossed. Castling is permissible under the following conditions:[5]
-          Neither the king nor the rook have previously moved during the game.
-          There cannot be any pieces between the king and the rook.
-          The king cannot be in check, nor can the king pass through squares that are under attack by enemy pieces, or move to a square where it would result in a check. Note that castling is permissible if the rook is attacked, or if the rook crosses a square that is attacked.
-
-En passant: When a pawn advances two squares from its starting position and there is an opponent's pawn on an adjacent file next to its destination square, then the opponent's pawn can capture it en passant (in passing), and move to the square the pawn passed over. This can only be done on the very next move, otherwise the right to do so is forfeit. For example, in the animated diagram, the black pawn advances two squares from g7 to g5, and the white pawn on f5 can take it via en passant on g6  (but only on White's next move).
-
-Promotion: When a pawn advances to the eighth rank, as a part of the move it is promoted and must be exchanged for the player's choice of queen, rook, bishop, or knight of the same color. Usually, the pawn is chosen to be promoted to a queen, but in some cases another piece is chosen; this is called underpromotion. In the animated diagram, the pawn on c7 can be advanced to the eighth rank and be promoted to an allowed piece. There is no restriction placed on the piece that is chosen on promotion, so it is possible to have more pieces of the same type than at the start of the game (for example, two queens).
-
-Check:
-
-End of the game:
-    Win by Checkmate
-    Draw
+Future additions/improvements:
+- function to save the game
+- refactor to make classes more modular and clean and methods doing only one thing each
