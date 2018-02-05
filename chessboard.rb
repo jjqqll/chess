@@ -1,11 +1,7 @@
-require 'yaml'
-require_relative 'save_game.rb'
 require_relative 'chessplayer.rb'
 require_relative 'chesspieces.rb'
 
 class GameBoard
-  include SaveGame
-
   attr_accessor :board, :player, :player1, :player2, :move_piece, :set_board, :from_square, :to_square, :turn_number, :options, :wp_promotion_rank, :bp_promotion_rank
 
   def initialize(name1 = "Player 1", name2 = "Player 2")

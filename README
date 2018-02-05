@@ -22,3 +22,9 @@ Processes:
 Future additions/improvements:
 - function to save the game
 - refactor to make classes more modular and clean and methods doing only one thing each
+
+TO PLAY:
+- Open your Terminal/Command Line.  Navigate to the location where you want to save the files.  Type:
+$ git clone https://github.com/jjqqll/chess.git
+$ cd chess
+$ ruby chessgame.rb

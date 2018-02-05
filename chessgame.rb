@@ -1,6 +1,4 @@
 require_relative 'chessboard.rb'
-require_relative 'save_game.rb'
-include SaveGame
 
 def get_name(player_number, stdin = $stdin)
   print "What is your name, player #{player_number}?\n"
